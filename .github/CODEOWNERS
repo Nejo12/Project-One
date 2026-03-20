@@ -1,0 +1,12 @@
+# Default ownership for all repository changes.
+* @Nejo12
+
+# Application areas.
+/apps/api/ @Nejo12
+/apps/web/ @Nejo12
+/apps/worker/ @Nejo12
+
+# Repository governance and documentation.
+/.github/ @Nejo12
+/docs/ @Nejo12
+

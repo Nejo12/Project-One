@@ -1,0 +1,39 @@
+name: Work item
+description: Create an implementation task tied to an issue, milestone, or epic.
+title: "chore(scope): "
+labels:
+  - task
+body:
+  - type: input
+    id: parent
+    attributes:
+      label: Parent issue or epic
+      description: Link the parent issue, epic, or planning document.
+      placeholder: "#123"
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objective
+      description: State the intended outcome of this work item.
+    validations:
+      required: true
+  - type: textarea
+    id: tasks
+    attributes:
+      label: Task checklist
+      description: Break the work into concrete implementation steps.
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation plan
+      description: Describe how the change will be verified.
+      placeholder: |
+        - `npm run verify`
+        - Manual check ...
+    validations:
+      required: true

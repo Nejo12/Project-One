@@ -35,6 +35,10 @@
   },
   "homepage": "https://github.com/Nejo12/Project-One#readme",
   "description": "",
+  "engines": {
+    "node": "^22.0.0 || >=24.0.0",
+    "npm": ">=10"
+  },
   "devDependencies": {
     "@commitlint/cli": "^20.5.0",
     "@commitlint/config-conventional": "^20.5.0",
