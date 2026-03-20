@@ -38,10 +38,22 @@ Dry run the issue plan:
 npm run issues:seed
 ```
 
+Preview the full GitHub bootstrap plan:
+
+```bash
+npm run github:bootstrap
+```
+
 Create the issues on GitHub:
 
 ```bash
 npm run issues:seed:apply
+```
+
+Create labels, milestones, and issues in the correct order:
+
+```bash
+npm run github:bootstrap:apply
 ```
 
 By default the script:
@@ -49,6 +61,7 @@ By default the script:
 - reads [`scripts/github/issue-seed.json`](../scripts/github/issue-seed.json)
 - prints the issue plan in dry-run mode
 - requires `gh` only when `--apply` is used
+- validates that referenced labels and milestones already exist before creating issues
 - skips issues that already exist by exact title
 
 ## Required External Setup
@@ -57,7 +70,7 @@ Before applying the seed:
 
 1. Install and authenticate the GitHub CLI.
 2. Confirm the repo remote points to the correct GitHub repository.
-3. Create the labels and milestones first.
+3. Create the labels and milestones first, or use `npm run github:bootstrap:apply`.
 
 ## Maintenance Rules
 

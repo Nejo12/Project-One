@@ -1,0 +1,92 @@
+[
+  {
+    "name": "bug",
+    "color": "d73a4a",
+    "description": "Confirmed defect or regression"
+  },
+  {
+    "name": "enhancement",
+    "color": "a2eeef",
+    "description": "Product or developer improvement"
+  },
+  {
+    "name": "task",
+    "color": "7057ff",
+    "description": "Concrete implementation or setup task"
+  },
+  {
+    "name": "epic",
+    "color": "5319e7",
+    "description": "Large backlog item spanning multiple user stories"
+  },
+  {
+    "name": "backend",
+    "color": "0e8a16",
+    "description": "Server-side domain, data, or integration work"
+  },
+  {
+    "name": "frontend",
+    "color": "1d76db",
+    "description": "Web UI, interaction, or client-side behavior"
+  },
+  {
+    "name": "infra",
+    "color": "0052cc",
+    "description": "Infrastructure, CI/CD, or environment setup"
+  },
+  {
+    "name": "payments",
+    "color": "fbca04",
+    "description": "Payment flows, pricing, and provider integration"
+  },
+  {
+    "name": "fulfillment",
+    "color": "d4c5f9",
+    "description": "Printing, shipment, and delivery pipeline work"
+  },
+  {
+    "name": "templates",
+    "color": "bfdadc",
+    "description": "Template catalog, editor, and rendering work"
+  },
+  {
+    "name": "moments",
+    "color": "f9d0c4",
+    "description": "Scheduling, drafts, and reminder automation"
+  },
+  {
+    "name": "security",
+    "color": "b60205",
+    "description": "Authentication, authorization, or security-sensitive work"
+  },
+  {
+    "name": "compliance",
+    "color": "c2e0c6",
+    "description": "GDPR, audit, or regulatory requirements"
+  },
+  {
+    "name": "testing",
+    "color": "fef2c0",
+    "description": "Test strategy, coverage, and reliability work"
+  },
+  {
+    "name": "blocked",
+    "color": "e99695",
+    "description": "Cannot progress until an external dependency is resolved"
+  },
+  {
+    "name": "priority:high",
+    "color": "b60205",
+    "description": "Highest delivery priority"
+  },
+  {
+    "name": "priority:medium",
+    "color": "fbca04",
+    "description": "Normal delivery priority"
+  },
+  {
+    "name": "priority:low",
+    "color": "0e8a16",
+    "description": "Lower delivery priority"
+  }
+]

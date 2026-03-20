@@ -1,0 +1,34 @@
+[
+  {
+    "title": "phase-0",
+    "description": "Vendor selection, lead-time assumptions, pricing decisions, and print-format constraints."
+  },
+  {
+    "title": "phase-1",
+    "description": "Foundation work across auth, admin setup, storage, CI, and backend persistence."
+  },
+  {
+    "title": "phase-2",
+    "description": "Contacts and address management foundations."
+  },
+  {
+    "title": "phase-3",
+    "description": "Template catalog, personalization, and rendering pipeline."
+  },
+  {
+    "title": "phase-4",
+    "description": "Moments rules, draft generation, scheduling, review, and notification behavior."
+  },
+  {
+    "title": "phase-5",
+    "description": "Payments, pricing, and order creation."
+  },
+  {
+    "title": "phase-6",
+    "description": "Fulfillment integration, shipment creation, and delivery tracking."
+  },
+  {
+    "title": "phase-7",
+    "description": "Hardening work across GDPR, monitoring, support tooling, and safety requirements."
+  }
+]

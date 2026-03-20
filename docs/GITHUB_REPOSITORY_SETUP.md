@@ -61,6 +61,8 @@ Use these labels as the baseline taxonomy:
 
 The product-planning labels and phase milestones should stay aligned with [`docs/GITHUB_ISSUES_MVP.md`](./GITHUB_ISSUES_MVP.md).
 
+The tracked label seed lives at [`scripts/github/label-seed.json`](../scripts/github/label-seed.json).
+
 ## Milestones
 
 Create these milestones:
@@ -75,6 +77,28 @@ Create these milestones:
 - `phase-7`
 
 Use the definitions in [`docs/GITHUB_ISSUES_MVP.md`](./GITHUB_ISSUES_MVP.md) as the source of truth.
+
+The tracked milestone seed lives at [`scripts/github/milestone-seed.json`](../scripts/github/milestone-seed.json).
+
+## Bootstrap Commands
+
+Preview the GitHub bootstrap plan locally:
+
+```bash
+npm run github:bootstrap
+```
+
+Apply labels, milestones, and seeded issues to GitHub:
+
+```bash
+npm run github:bootstrap:apply
+```
+
+You can also apply each layer independently:
+
+- `npm run github:labels:apply`
+- `npm run github:milestones:apply`
+- `npm run issues:seed:apply`
 
 ## Owners and Reviews
 

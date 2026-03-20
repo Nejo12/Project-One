@@ -1,7 +1,13 @@
-import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  ensureGitHubCli,
+  listRepoLabels,
+  listRepoMilestones,
+  parseRepoFromGitRemote,
+  runCommand,
+} from "./github-cli.mjs";
 
 const args = new Set(process.argv.slice(2));
 const apply = args.has("--apply");
@@ -12,24 +18,6 @@ const seedPath = path.join(__dirname, "issue-seed.json");
 
 /** @type {IssueSeed[]} */
 const seeds = JSON.parse(readFileSync(seedPath, "utf8"));
-
-function parseRepoFromGitRemote() {
-  const remote = execFileSync("git", ["config", "--get", "remote.origin.url"], {
-    encoding: "utf8",
-  }).trim();
-
-  const sshMatch = remote.match(/github\.com:(.+?)(?:\.git)?$/);
-  if (sshMatch) {
-    return sshMatch[1];
-  }
-
-  const httpsMatch = remote.match(/github\.com\/(.+?)(?:\.git)?$/);
-  if (httpsMatch) {
-    return httpsMatch[1];
-  }
-
-  throw new Error(`Unable to determine GitHub repository from remote.origin.url: ${remote}`);
-}
 
 function logSeed(seed, index) {
   console.log(`${index + 1}. ${seed.title}`);
@@ -45,12 +33,27 @@ if (!apply) {
 }
 
 const repo = parseRepoFromGitRemote();
+ensureGitHubCli();
+const existingLabels = new Set(listRepoLabels(repo).map((label) => label.name));
+const existingMilestones = new Set(listRepoMilestones(repo).map((milestone) => milestone.title));
+const missingLabels = [...new Set(seeds.flatMap((seed) => seed.labels))].filter(
+  (label) => !existingLabels.has(label),
+);
+const missingMilestones = [...new Set(seeds.map((seed) => seed.milestone))].filter(
+  (milestone) => !existingMilestones.has(milestone),
+);
 
-try {
-  execFileSync("gh", ["--version"], { stdio: "ignore" });
-} catch {
+if (missingLabels.length > 0 || missingMilestones.length > 0) {
+  if (missingLabels.length > 0) {
+    console.error(`Missing labels: ${missingLabels.join(", ")}`);
+  }
+
+  if (missingMilestones.length > 0) {
+    console.error(`Missing milestones: ${missingMilestones.join(", ")}`);
+  }
+
   console.error(
-    "GitHub CLI is required to apply the issue seed. Install `gh` and authenticate first.",
+    "Apply the label and milestone seeds first with `npm run github:labels:apply` and `npm run github:milestones:apply`.",
   );
   process.exit(1);
 }
@@ -60,22 +63,18 @@ console.log(`Applying issue seed to ${repo}`);
 for (const [index, seed] of seeds.entries()) {
   logSeed(seed, index);
 
-  const existing = execFileSync(
-    "gh",
-    [
-      "issue",
-      "list",
-      "--repo",
-      repo,
-      "--search",
-      `in:title "${seed.title}"`,
-      "--json",
-      "title",
-      "--limit",
-      "20",
-    ],
-    { encoding: "utf8" },
-  );
+  const existing = runCommand("gh", [
+    "issue",
+    "list",
+    "--repo",
+    repo,
+    "--search",
+    `in:title "${seed.title}"`,
+    "--json",
+    "title",
+    "--limit",
+    "20",
+  ]);
 
   const matches = JSON.parse(existing);
   if (matches.some((issue) => issue.title === seed.title)) {
@@ -84,7 +83,7 @@ for (const [index, seed] of seeds.entries()) {
   }
 
   const labelArgs = seed.labels.flatMap((label) => ["--label", label]);
-  execFileSync(
+  runCommand(
     "gh",
     [
       "issue",
