@@ -49,17 +49,18 @@ These tokens should remain the source of truth until a shared UI package is extr
 
 ## Initial Component Baseline
 
-The first web page establishes the baseline primitives:
+The current web layer now includes reusable primitives under [`apps/web/src/components`](../apps/web/src/components):
 
-- page shell
-- hero
-- feature cards
-- status strip
-- primary and secondary actions
+- `ui/ActionLink`
+- `ui/PanelSurface`
+- `ui/StatusPill`
+- `design-system/ColorSwatch`
+
+These components support the seeded homepage and the `/docs` design-system reference page.
 
 ## Next Steps
 
-1. Extract repeated page primitives into shared components under `apps/web/src/components`.
-2. Add a token reference page or Storybook once more UI is present.
+1. Expand the current primitives only when a second or third screen needs the same behavior.
+2. Add a richer token reference page or Storybook once more UI states exist.
 3. Introduce status and feedback tokens when real product flows require them.
 4. Move shared primitives into a package only after multiple apps consume them.
