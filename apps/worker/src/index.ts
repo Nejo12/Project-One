@@ -48,6 +48,9 @@ async function assertRedisAvailable(): Promise<void> {
     lazyConnect: true,
     maxRetriesPerRequest: 1,
   });
+  redis.on("error", () => {
+    // The explicit connect/ping check below turns connectivity failures into one clear startup error.
+  });
 
   try {
     await redis.connect();

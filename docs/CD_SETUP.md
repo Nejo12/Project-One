@@ -88,8 +88,15 @@ For each Railway service:
 1. connect the repository
 2. configure the service root directory
 3. add runtime variables from [`ENVIRONMENT_STRATEGY.md`](./ENVIRONMENT_STRATEGY.md)
-4. generate a deploy hook URL
-5. store that deploy hook URL in the matching GitHub secret
+4. configure service commands:
+   - `api`
+     - build: `npm -w api run build`
+     - start: `npm -w api run start:prod`
+   - `worker`
+     - build: `npm -w worker run build`
+     - start: `npm -w worker run start`
+5. generate a deploy hook URL
+6. store that deploy hook URL in the matching GitHub secret
 
 ## Workflow Behavior
 

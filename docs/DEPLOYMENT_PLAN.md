@@ -39,6 +39,8 @@ The repository now includes baseline deployment workflows for the documented tar
 - Deploy as a separate long-running service.
 - Share Redis and object storage configuration with the API.
 - Do not couple worker rollout to web deploys.
+- Build from the monorepo root with `npm -w worker run build`.
+- Start the production worker with `npm -w worker run start`.
 
 ## Environment Mapping
 
