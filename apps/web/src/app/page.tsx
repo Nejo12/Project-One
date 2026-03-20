@@ -29,14 +29,9 @@ export default function Home() {
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row">
-              <ActionLink href="/docs">View System Goals</ActionLink>
-              <ActionLink
-                href="https://github.com/Nejo12/Project-One"
-                target="_blank"
-                rel="noopener noreferrer"
-                variant="secondary"
-              >
-                Review Repository
+              <ActionLink href="/auth/signup">Create account</ActionLink>
+              <ActionLink href="/auth/login" variant="secondary">
+                Sign in
               </ActionLink>
             </div>
           </div>
@@ -87,11 +82,11 @@ export default function Home() {
               Current Baseline
             </p>
             <p className="mt-2 max-w-2xl text-sm leading-7 text-foreground/70 sm:text-base">
-              The system currently defines token groups, surface conventions, and action patterns.
-              The next step is extracting reusable UI primitives under `apps/web/src/components`.
+              The system now defines token groups, reusable page primitives, and a first auth
+              journey that talks to the API contract directly.
             </p>
           </div>
-          <StatusPill>Ready for component extraction</StatusPill>
+          <StatusPill>Ready for sender onboarding</StatusPill>
         </PanelSurface>
       </main>
     </div>
