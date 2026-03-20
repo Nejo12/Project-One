@@ -62,6 +62,7 @@ Only the web app may expose browser-safe variables, and they must use the `NEXT_
 | `NODE_ENV`             | `development` | `test` | `production` | `production` | `production` | Runtime mode                             |
 | `WEB_APP_URL`          | Required      | No     | Optional     | Required     | Required     | Shared local reference only              |
 | `API_BASE_URL`         | Required      | No     | Optional     | Required     | Required     | Shared local reference only              |
+| `DATABASE_URL`         | Required      | No     | Required     | Required     | Required     | Primary application database             |
 | `REDIS_URL`            | Required      | No     | Required     | Required     | Required     | Queue backing service                    |
 | `S3_ENDPOINT`          | Required      | No     | Required     | Required     | Required     | Local MinIO, remote object storage later |
 | `S3_BUCKET`            | Required      | No     | Required     | Required     | Required     | Artifact bucket                          |
@@ -111,7 +112,7 @@ The current CI workflow runs repository verification only and should not require
 
 ## Local Development Policy
 
-- Use `npm run infra:up` to start Redis and MinIO locally.
+- Use `npm run infra:up` to start Postgres, Redis, and MinIO locally.
 - Use `npm run dev` for web + API.
 - Use `npm run dev:worker` only when infrastructure is available.
 - Use `npm run dev:full` to run infrastructure and all app processes together.
