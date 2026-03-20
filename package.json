@@ -14,6 +14,7 @@
     "infra:up": "docker compose up -d redis minio minio-init",
     "infra:down": "docker compose down",
     "infra:logs": "docker compose logs -f redis minio minio-init",
+    "commitlint": "commitlint --edit",
     "lint": "npm -w api run lint && npm -w web run lint && npm -w web run stylelint && npm -w worker run lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -35,6 +36,8 @@
   "homepage": "https://github.com/Nejo12/Project-One#readme",
   "description": "",
   "devDependencies": {
+    "@commitlint/cli": "^20.5.0",
+    "@commitlint/config-conventional": "^20.5.0",
     "concurrently": "^9.2.1",
     "husky": "^9.1.7",
     "prettier": "^3.8.1",

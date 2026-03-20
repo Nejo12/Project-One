@@ -6,6 +6,65 @@ Before concluding any task, review the `scripts` section in the root [`package.j
 
 Run the smallest relevant checks while iterating, then run `npm run verify` before declaring implementation complete.
 
+The standard local workflow is:
+
+1. Create a branch from `main`.
+2. Run `npm run format`.
+3. Run `npm run verify`.
+4. Commit with a Conventional Commit message.
+5. Open a pull request linked to the relevant issue.
+
+## Branch Naming
+
+Use branches in the format `<type>/<scope>-<short-description>`.
+
+Recommended branch types:
+
+- `feat`
+- `fix`
+- `chore`
+- `docs`
+- `refactor`
+- `test`
+- `ci`
+
+Examples:
+
+- `feat/web-template-catalog`
+- `fix/api-port-config`
+- `chore/repo-enforce-commitlint`
+
+## Commit Messages
+
+This repository uses Conventional Commits and validates commit messages with `commitlint`.
+
+Use the format `<type>(<scope>): <subject>` when a scope is helpful, or `<type>: <subject>` when it is not.
+
+Recommended commit types:
+
+- `feat`
+- `fix`
+- `chore`
+- `docs`
+- `refactor`
+- `test`
+- `ci`
+
+Examples:
+
+- `feat(web): add template catalog page`
+- `fix(api): default dev server to port 3001`
+- `chore(repo): enforce prettier before commit`
+
+## Pull Requests and Merges
+
+- Do not push directly to `main`.
+- Keep each pull request scoped to one logical change.
+- Ensure `npm run verify` passes before requesting review.
+- Link the pull request to the relevant issue or task.
+- Prefer squash merges so `main` keeps a clean, reviewable history.
+- Require at least one review before merging once branch protection is enabled.
+
 ## Engineering Standards
 
 Write code that is readable, maintainable, and efficient. Favor clear names, small focused modules, consistent formatting, and changes that reduce duplication instead of spreading similar logic across the codebase.
@@ -45,6 +104,7 @@ Before creating a new component, helper, service, or package:
 Before marking work complete:
 
 1. Review the relevant `package.json` scripts in the root package and the affected workspace package.
-2. Run the relevant package-level checks while implementing.
+2. Run `npm run format`.
 3. Run `npm run verify` for a full repository validation pass when the change is ready.
 4. Confirm that the change is typed correctly, lint-clean, and does not leave dead code behind.
+5. Use a Conventional Commit message when committing the work.
