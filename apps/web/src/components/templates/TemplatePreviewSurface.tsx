@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import type { CSSProperties } from "react";
 import { PanelSurface } from "@/components/ui/PanelSurface";
 import {
@@ -7,14 +8,32 @@ import {
   templateCategoryLabels,
   TemplateView,
 } from "@/lib/templates-contract";
+import { TemplateEditorPhotoFit } from "@/lib/template-editor";
 
 type TemplatePreviewSurfaceProps = {
   template: TemplateView;
   compact?: boolean;
+  headline?: string;
+  message?: string;
+  fieldSummaries?: string[];
+  photoPreviewUrl?: string | null;
+  photoFit?: TemplateEditorPhotoFit;
 };
 
-export function TemplatePreviewSurface({ template, compact = false }: TemplatePreviewSurfaceProps) {
+export function TemplatePreviewSurface({
+  template,
+  compact = false,
+  headline,
+  message,
+  fieldSummaries,
+  photoPreviewUrl,
+  photoFit = "FIT",
+}: TemplatePreviewSurfaceProps) {
   const photoField = template.fields.find((field) => field.kind === "PHOTO");
+  const previewHeadline = headline ?? template.previewHeadline;
+  const previewMessage = message ?? template.previewMessage;
+  const previewFieldSummaries =
+    fieldSummaries ?? template.fields.map((field) => `${field.label}${field.required ? " *" : ""}`);
 
   return (
     <PanelSurface
@@ -50,12 +69,12 @@ export function TemplatePreviewSurface({ template, compact = false }: TemplatePr
                 : "text-3xl font-semibold leading-tight"
             }
           >
-            {template.previewHeadline}
+            {previewHeadline}
           </h3>
           <p
             className={compact ? "text-sm leading-6 opacity-80" : "text-base leading-7 opacity-80"}
           >
-            {template.previewMessage}
+            {previewMessage}
           </p>
         </div>
 
@@ -74,15 +93,37 @@ export function TemplatePreviewSurface({ template, compact = false }: TemplatePr
               <p className="text-[11px] font-semibold tracking-[0.16em] uppercase opacity-55">
                 Photo area
               </p>
-              <div
-                className="mt-3 rounded-[var(--radius-md)] border border-dashed"
-                style={{
-                  minHeight: compact ? 72 : 108,
-                  borderColor: `${template.accentHex}55`,
-                  background:
-                    "linear-gradient(135deg, rgba(255,255,255,0.36), rgba(255,255,255,0.08))",
-                }}
-              />
+              {photoPreviewUrl ? (
+                <div
+                  className="relative mt-3 overflow-hidden rounded-[var(--radius-md)] border"
+                  style={{
+                    minHeight: compact ? 72 : 108,
+                    borderColor: `${template.accentHex}55`,
+                    backgroundColor: "#FFFFFF77",
+                  }}
+                >
+                  <Image
+                    src={photoPreviewUrl}
+                    alt="Selected template preview"
+                    fill
+                    unoptimized
+                    className="h-full w-full"
+                    style={{
+                      objectFit: photoFit === "COVER" ? "cover" : "contain",
+                    }}
+                  />
+                </div>
+              ) : (
+                <div
+                  className="mt-3 rounded-[var(--radius-md)] border border-dashed"
+                  style={{
+                    minHeight: compact ? 72 : 108,
+                    borderColor: `${template.accentHex}55`,
+                    background:
+                      "linear-gradient(135deg, rgba(255,255,255,0.36), rgba(255,255,255,0.08))",
+                  }}
+                />
+              )}
             </div>
           ) : null}
 
@@ -96,11 +137,8 @@ export function TemplatePreviewSurface({ template, compact = false }: TemplatePr
               Copy structure
             </p>
             <ul className="mt-3 space-y-2 text-sm leading-6 opacity-75">
-              {template.fields.map((field) => (
-                <li key={field.key}>
-                  {field.label}
-                  {field.required ? " *" : ""}
-                </li>
+              {previewFieldSummaries.map((summary) => (
+                <li key={summary}>{summary}</li>
               ))}
             </ul>
           </div>

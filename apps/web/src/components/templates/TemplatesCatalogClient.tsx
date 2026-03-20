@@ -170,11 +170,10 @@ export function TemplatesCatalogClient() {
               </div>
 
               <ActionLink
-                href="/dashboard"
-                variant="secondary"
+                href={`/templates/${selectedTemplate.slug}`}
                 className="min-h-10 px-4 py-2 text-xs"
               >
-                Back to dashboard
+                Open editor
               </ActionLink>
             </div>
 

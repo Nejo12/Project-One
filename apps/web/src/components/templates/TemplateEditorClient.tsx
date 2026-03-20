@@ -1,0 +1,308 @@
+"use client";
+
+import { useDeferredValue, useEffect, useState, useTransition } from "react";
+import { AuthField } from "@/components/auth/AuthField";
+import { AuthFormCard } from "@/components/auth/AuthFormCard";
+import { AuthMessage } from "@/components/auth/AuthMessage";
+import { TemplatePreviewSurface } from "@/components/templates/TemplatePreviewSurface";
+import { ActionLink } from "@/components/ui/ActionLink";
+import { PanelSurface } from "@/components/ui/PanelSurface";
+import { StatusPill } from "@/components/ui/StatusPill";
+import { getTemplate } from "@/lib/templates-api";
+import { TemplateFieldView, TemplateView } from "@/lib/templates-contract";
+import {
+  buildEditorPreviewContent,
+  createEditorFieldValues,
+  insertVariableToken,
+  TemplateEditorFieldValues,
+  TemplateEditorPhotoFit,
+  templateVariableTokens,
+} from "@/lib/template-editor";
+
+type TemplateEditorClientProps = {
+  templateSlug: string;
+};
+
+export function TemplateEditorClient({ templateSlug }: TemplateEditorClientProps) {
+  const [isPending, startTransition] = useTransition();
+  const [template, setTemplate] = useState<TemplateView | null>(null);
+  const [fieldValues, setFieldValues] = useState<TemplateEditorFieldValues>({});
+  const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>(null);
+  const [photoFileName, setPhotoFileName] = useState<string | null>(null);
+  const [photoFit, setPhotoFit] = useState<TemplateEditorPhotoFit>("FIT");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    startTransition(async () => {
+      try {
+        const response = await getTemplate(templateSlug);
+        setTemplate(response.template);
+        setFieldValues(createEditorFieldValues(response.template));
+        setPhotoPreviewUrl(null);
+        setPhotoFileName(null);
+        setPhotoFit("FIT");
+        setErrorMessage(null);
+      } catch (error) {
+        setTemplate(null);
+        setFieldValues({});
+        setPhotoPreviewUrl(null);
+        setPhotoFileName(null);
+        setErrorMessage(error instanceof Error ? error.message : "Unable to load the template.");
+      }
+    });
+  }, [templateSlug]);
+
+  useEffect(() => {
+    return () => {
+      if (photoPreviewUrl) {
+        URL.revokeObjectURL(photoPreviewUrl);
+      }
+    };
+  }, [photoPreviewUrl]);
+
+  const deferredFieldValues = useDeferredValue(fieldValues);
+  const preview = template
+    ? buildEditorPreviewContent(template, deferredFieldValues, Boolean(photoPreviewUrl))
+    : null;
+
+  function handleFieldChange(fieldKey: string, value: string) {
+    setFieldValues((current) => ({
+      ...current,
+      [fieldKey]: value,
+    }));
+  }
+
+  function handleVariableInsert(fieldKey: string, token: string) {
+    setFieldValues((current) => ({
+      ...current,
+      [fieldKey]: insertVariableToken(current[fieldKey] ?? "", token),
+    }));
+  }
+
+  function handlePhotoChange(file: File | null) {
+    if (photoPreviewUrl) {
+      URL.revokeObjectURL(photoPreviewUrl);
+    }
+
+    if (!file) {
+      setPhotoPreviewUrl(null);
+      setPhotoFileName(null);
+      return;
+    }
+
+    setPhotoPreviewUrl(URL.createObjectURL(file));
+    setPhotoFileName(file.name);
+  }
+
+  if (errorMessage) {
+    return <AuthMessage tone="error">{errorMessage}</AuthMessage>;
+  }
+
+  if (!template || !preview) {
+    return <AuthMessage tone="info">Loading the editor for this template.</AuthMessage>;
+  }
+
+  return (
+    <div className="grid gap-6 xl:grid-cols-[0.96fr_1.04fr]">
+      <AuthFormCard
+        title={`${template.name} editor`}
+        description="This MVP editor binds inputs directly from template metadata. It supports typed text fields, variable insertion, one-photo input, and a live preview surface without introducing storage or rendering persistence yet."
+        footer={
+          <div className="flex flex-wrap gap-3">
+            <ActionLink
+              href="/templates"
+              variant="secondary"
+              className="min-h-10 px-4 py-2 text-xs"
+            >
+              Back to catalog
+            </ActionLink>
+            <ActionLink
+              href="/dashboard"
+              variant="secondary"
+              className="min-h-10 px-4 py-2 text-xs"
+            >
+              Dashboard
+            </ActionLink>
+          </div>
+        }
+      >
+        <div className="flex flex-col gap-5">
+          <div className="flex flex-wrap gap-3">
+            <StatusPill tone="accent">{template.orientation}</StatusPill>
+            <StatusPill>{template.fields.length} mapped inputs</StatusPill>
+          </div>
+
+          {template.fields.map((field) => (
+            <TemplateEditorFieldInput
+              key={field.key}
+              field={field}
+              value={fieldValues[field.key] ?? ""}
+              photoFileName={photoFileName}
+              photoFit={photoFit}
+              onFieldChange={handleFieldChange}
+              onPhotoChange={handlePhotoChange}
+              onPhotoFitChange={setPhotoFit}
+              onVariableInsert={handleVariableInsert}
+            />
+          ))}
+
+          <AuthMessage tone="info">
+            Editor state is local for this slice. The next storage and rendering steps will turn
+            this into persisted preview data and print-ready output.
+          </AuthMessage>
+        </div>
+      </AuthFormCard>
+
+      <div className="grid gap-4">
+        <PanelSurface className="px-6 py-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold tracking-[0.16em] text-foreground/45 uppercase">
+                Live preview
+              </p>
+              <h2 className="mt-2 text-2xl font-semibold tracking-[-0.03em] text-foreground">
+                Preview updates from your current editor state.
+              </h2>
+            </div>
+
+            {isPending ? <StatusPill tone="accent">Refreshing</StatusPill> : null}
+          </div>
+
+          <div className="mt-5">
+            <TemplatePreviewSurface
+              template={template}
+              headline={preview.headline}
+              message={preview.message}
+              fieldSummaries={preview.fieldSummaries}
+              photoPreviewUrl={photoPreviewUrl}
+              photoFit={photoFit}
+            />
+          </div>
+        </PanelSurface>
+
+        <PanelSurface className="px-6 py-6">
+          <p className="text-xs font-semibold tracking-[0.16em] text-accent uppercase">
+            Editor readiness
+          </p>
+          <ul className="mt-4 space-y-3 text-sm leading-7 text-foreground/72">
+            <li>
+              Template metadata is now driving the form structure instead of hand-authored fields.
+            </li>
+            <li>
+              Variable tokens can be inserted into text inputs before rendering support exists.
+            </li>
+            <li>
+              One local image input and fit/cover controls are in place for the next upload and
+              rendering slices.
+            </li>
+          </ul>
+        </PanelSurface>
+      </div>
+    </div>
+  );
+}
+
+type TemplateEditorFieldInputProps = {
+  field: TemplateFieldView;
+  value: string;
+  photoFileName: string | null;
+  photoFit: TemplateEditorPhotoFit;
+  onFieldChange: (fieldKey: string, value: string) => void;
+  onPhotoChange: (file: File | null) => void;
+  onPhotoFitChange: (fit: TemplateEditorPhotoFit) => void;
+  onVariableInsert: (fieldKey: string, token: string) => void;
+};
+
+function TemplateEditorFieldInput({
+  field,
+  value,
+  photoFileName,
+  photoFit,
+  onFieldChange,
+  onPhotoChange,
+  onPhotoFitChange,
+  onVariableInsert,
+}: TemplateEditorFieldInputProps) {
+  if (field.kind === "TEXT") {
+    return (
+      <AuthField
+        label={field.label}
+        name={field.key}
+        value={value}
+        placeholder={field.placeholder ?? undefined}
+        onChange={(nextValue) => onFieldChange(field.key, nextValue)}
+      />
+    );
+  }
+
+  if (field.kind === "TEXTAREA") {
+    return (
+      <label className="flex flex-col gap-2">
+        <span className="text-xs font-semibold tracking-[0.14em] text-foreground/55 uppercase">
+          {field.label}
+        </span>
+        <textarea
+          id={field.key}
+          name={field.key}
+          value={value}
+          placeholder={field.placeholder ?? undefined}
+          maxLength={field.maxLength ?? undefined}
+          onChange={(event) => onFieldChange(field.key, event.target.value)}
+          className="field-input min-h-36 resize-y"
+        />
+        <div className="flex flex-wrap gap-2">
+          {templateVariableTokens.map((token) => (
+            <button
+              key={token}
+              type="button"
+              className="rounded-full border border-border bg-surface-muted px-3 py-1 text-[11px] font-semibold tracking-[0.12em] text-foreground/72 uppercase transition-colors hover:bg-surface-strong"
+              onClick={() => onVariableInsert(field.key, token)}
+            >
+              Insert {token}
+            </button>
+          ))}
+        </div>
+      </label>
+    );
+  }
+
+  return (
+    <div className="grid gap-4 rounded-[var(--radius-md)] border border-border bg-surface px-4 py-4">
+      <div>
+        <p className="text-xs font-semibold tracking-[0.14em] text-foreground/55 uppercase">
+          {field.label}
+        </p>
+        <p className="mt-2 text-sm leading-7 text-foreground/70">
+          Choose one image to test the card composition before storage-backed uploads land.
+        </p>
+      </div>
+
+      <input
+        type="file"
+        accept="image/*"
+        onChange={(event) => onPhotoChange(event.target.files?.[0] ?? null)}
+        className="block text-sm text-foreground/72 file:mr-4 file:rounded-full file:border-0 file:bg-accent file:px-4 file:py-2 file:text-xs file:font-semibold file:tracking-[0.12em] file:text-white file:uppercase hover:file:bg-accent-strong"
+      />
+
+      <div className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
+        <div className="rounded-[var(--radius-md)] border border-border bg-surface-muted px-4 py-3 text-sm text-foreground/72">
+          {photoFileName ? `Selected image: ${photoFileName}` : "No image selected yet."}
+        </div>
+
+        <label className="flex flex-col gap-2">
+          <span className="text-xs font-semibold tracking-[0.14em] text-foreground/55 uppercase">
+            Fit mode
+          </span>
+          <select
+            className="field-input min-w-[160px]"
+            value={photoFit}
+            onChange={(event) => onPhotoFitChange(event.target.value as TemplateEditorPhotoFit)}
+          >
+            <option value="FIT">Fit</option>
+            <option value="COVER">Cover</option>
+          </select>
+        </label>
+      </div>
+    </div>
+  );
+}
