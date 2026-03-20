@@ -8,6 +8,9 @@ import { TemplatePreviewSurface } from "@/components/templates/TemplatePreviewSu
 import { ActionLink } from "@/components/ui/ActionLink";
 import { PanelSurface } from "@/components/ui/PanelSurface";
 import { StatusPill } from "@/components/ui/StatusPill";
+import { readStoredAuthSession } from "@/lib/auth-session";
+import { listPhotoUploads, uploadPhoto } from "@/lib/storage-api";
+import { StoredObjectView } from "@/lib/storage-contract";
 import { getTemplate } from "@/lib/templates-api";
 import { TemplateFieldView, TemplateView } from "@/lib/templates-contract";
 import {
@@ -25,11 +28,17 @@ type TemplateEditorClientProps = {
 
 export function TemplateEditorClient({ templateSlug }: TemplateEditorClientProps) {
   const [isPending, startTransition] = useTransition();
+  const [isUploadingPhoto, startPhotoUploadTransition] = useTransition();
+  const storedSession = readStoredAuthSession();
+  const accessToken = storedSession?.session.accessToken ?? null;
   const [template, setTemplate] = useState<TemplateView | null>(null);
   const [fieldValues, setFieldValues] = useState<TemplateEditorFieldValues>({});
   const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>(null);
   const [photoFileName, setPhotoFileName] = useState<string | null>(null);
   const [photoFit, setPhotoFit] = useState<TemplateEditorPhotoFit>("FIT");
+  const [uploadedPhoto, setUploadedPhoto] = useState<StoredObjectView | null>(null);
+  const [recentUploads, setRecentUploads] = useState<StoredObjectView[]>([]);
+  const [storageMessage, setStorageMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -41,6 +50,8 @@ export function TemplateEditorClient({ templateSlug }: TemplateEditorClientProps
         setPhotoPreviewUrl(null);
         setPhotoFileName(null);
         setPhotoFit("FIT");
+        setUploadedPhoto(null);
+        setStorageMessage(null);
         setErrorMessage(null);
       } catch (error) {
         setTemplate(null);
@@ -51,6 +62,23 @@ export function TemplateEditorClient({ templateSlug }: TemplateEditorClientProps
       }
     });
   }, [templateSlug]);
+
+  useEffect(() => {
+    if (!accessToken) {
+      return;
+    }
+
+    startPhotoUploadTransition(async () => {
+      try {
+        const response = await listPhotoUploads(accessToken);
+        setRecentUploads(response.objects.slice(0, 4));
+      } catch {
+        setRecentUploads([]);
+      }
+    });
+  }, [accessToken]);
+
+  const recentUploadsToShow = accessToken ? recentUploads : [];
 
   useEffect(() => {
     return () => {
@@ -87,11 +115,38 @@ export function TemplateEditorClient({ templateSlug }: TemplateEditorClientProps
     if (!file) {
       setPhotoPreviewUrl(null);
       setPhotoFileName(null);
+      setUploadedPhoto(null);
+      setStorageMessage(null);
       return;
     }
 
     setPhotoPreviewUrl(URL.createObjectURL(file));
     setPhotoFileName(file.name);
+
+    if (!accessToken) {
+      setUploadedPhoto(null);
+      setStorageMessage(
+        "Local preview is available, but sign in with a stored session before uploading the photo to object storage.",
+      );
+      return;
+    }
+
+    startPhotoUploadTransition(async () => {
+      try {
+        const response = await uploadPhoto(accessToken, file);
+        setUploadedPhoto(response.object);
+        setStorageMessage(`Uploaded to object storage as ${response.object.id}.`);
+        const uploadsResponse = await listPhotoUploads(accessToken);
+        setRecentUploads(uploadsResponse.objects.slice(0, 4));
+      } catch (error) {
+        setUploadedPhoto(null);
+        setStorageMessage(
+          error instanceof Error
+            ? error.message
+            : "Unable to upload the selected photo to object storage.",
+        );
+      }
+    });
   }
 
   if (errorMessage) {
@@ -147,8 +202,8 @@ export function TemplateEditorClient({ templateSlug }: TemplateEditorClientProps
           ))}
 
           <AuthMessage tone="info">
-            Editor state is local for this slice. The next storage and rendering steps will turn
-            this into persisted preview data and print-ready output.
+            Text edits remain local for this slice, but photo uploads now go through the API storage
+            boundary so later rendering work can reference a stable stored asset.
           </AuthMessage>
         </div>
       </AuthFormCard>
@@ -165,7 +220,9 @@ export function TemplateEditorClient({ templateSlug }: TemplateEditorClientProps
               </h2>
             </div>
 
-            {isPending ? <StatusPill tone="accent">Refreshing</StatusPill> : null}
+            {isPending || isUploadingPhoto ? (
+              <StatusPill tone="accent">Refreshing</StatusPill>
+            ) : null}
           </div>
 
           <div className="mt-5">
@@ -192,10 +249,45 @@ export function TemplateEditorClient({ templateSlug }: TemplateEditorClientProps
               Variable tokens can be inserted into text inputs before rendering support exists.
             </li>
             <li>
-              One local image input and fit/cover controls are in place for the next upload and
-              rendering slices.
+              One-photo uploads now pass through the API storage boundary and return stable object
+              metadata for later rendering work.
             </li>
           </ul>
+        </PanelSurface>
+
+        <PanelSurface className="px-6 py-6">
+          <p className="text-xs font-semibold tracking-[0.16em] text-accent uppercase">
+            Storage status
+          </p>
+          <div className="mt-4 space-y-4 text-sm leading-7 text-foreground/72">
+            {storageMessage ? <AuthMessage tone="info">{storageMessage}</AuthMessage> : null}
+
+            {uploadedPhoto ? (
+              <div className="rounded-[var(--radius-md)] border border-border bg-surface px-4 py-4">
+                Latest stored photo: {uploadedPhoto.originalFilename ?? uploadedPhoto.id} /{" "}
+                {uploadedPhoto.sizeBytes} bytes
+              </div>
+            ) : null}
+
+            {recentUploadsToShow.length > 0 ? (
+              <div>
+                <p className="text-xs font-semibold tracking-[0.14em] text-foreground/45 uppercase">
+                  Recent uploads
+                </p>
+                <ul className="mt-3 space-y-2">
+                  {recentUploadsToShow.map((upload) => (
+                    <li
+                      key={upload.id}
+                      className="rounded-[var(--radius-md)] border border-border bg-surface px-4 py-3"
+                    >
+                      {upload.originalFilename ?? upload.id} / {upload.contentType} /{" "}
+                      {upload.sizeBytes} bytes
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+          </div>
         </PanelSurface>
       </div>
     </div>
@@ -273,7 +365,7 @@ function TemplateEditorFieldInput({
           {field.label}
         </p>
         <p className="mt-2 text-sm leading-7 text-foreground/70">
-          Choose one image to test the card composition before storage-backed uploads land.
+          Choose one image to test the card composition and send it through the storage boundary.
         </p>
       </div>
 

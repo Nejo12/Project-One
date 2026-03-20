@@ -49,6 +49,11 @@ enum TemplateFieldKind {
   PHOTO
 }
 
+enum StoredObjectKind {
+  PHOTO_UPLOAD
+  RENDER_ARTIFACT
+}
+
 model User {
   id                  String                   @id @default(cuid())
   email               String                   @unique
@@ -61,6 +66,7 @@ model User {
   addresses           Address[]
   contacts            Contact[]
   profile             SenderProfile?
+  storedObjects       StoredObject[]
   verificationTokens  EmailVerificationToken[]
   passwordResetTokens PasswordResetToken[]
 }
@@ -181,6 +187,24 @@ model TemplateField {
 
   @@unique([templateId, key])
   @@index([templateId, position])
+}
+
+model StoredObject {
+  id               String           @id @default(cuid())
+  userId           String?
+  kind             StoredObjectKind
+  bucket           String
+  objectKey        String           @unique
+  originalFilename String?
+  contentType      String
+  sizeBytes        Int
+  checksumSha256   String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  user             User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, kind, createdAt])
+  @@index([kind, createdAt])
 }
 
 model PasswordResetToken {
