@@ -1,0 +1,80 @@
+[
+  {
+    "title": "EPIC-1: Enable verified users to reach checkout",
+    "milestone": "phase-1",
+    "labels": ["epic", "backend", "frontend", "security"],
+    "body": "## Summary\n\nShip end-to-end user auth with email verification so only verified users can place orders.\n\n## Acceptance Criteria\n\n- [ ] User can sign up, verify email, log in, and access the dashboard.\n- [ ] Unverified users cannot place orders.\n\n## Notes\n\n- Use the product requirements in `docs/GITHUB_ISSUES_MVP.md` as the source of truth.\n"
+  },
+  {
+    "title": "EPIC-2: Build reliable contacts and validated addresses",
+    "milestone": "phase-2",
+    "labels": ["epic", "backend", "frontend"],
+    "body": "## Summary\n\nProvide CRUD for contacts and addresses plus CSV import for MVP usability.\n\n## Acceptance Criteria\n\n- [ ] Users can manage contacts and addresses reliably.\n- [ ] Address validation status is tracked before order usage.\n\n## Notes\n\n- Use the product requirements in `docs/GITHUB_ISSUES_MVP.md` as the source of truth.\n"
+  },
+  {
+    "title": "EPIC-3: Deliver real template previews and a print-ready pipeline",
+    "milestone": "phase-3",
+    "labels": ["epic", "frontend", "backend", "templates", "testing"],
+    "body": "## Summary\n\nSeed templates, let users edit messages and photos, render print-ready previews, and keep output immutable for orders.\n\n## Acceptance Criteria\n\n- [ ] A template can be previewed before selection.\n- [ ] Print-ready rendering output is testable and stable.\n\n## Notes\n\n- Use the product requirements in `docs/GITHUB_ISSUES_MVP.md` as the source of truth.\n"
+  },
+  {
+    "title": "EPIC-4: Turn moments rules into scheduled drafts with approvals",
+    "milestone": "phase-4",
+    "labels": ["epic", "backend", "frontend", "moments"],
+    "body": "## Summary\n\nCreate moments rules, compute next occurrences, generate drafts at lead time, and manage draft approval.\n\n## Acceptance Criteria\n\n- [ ] Creating a moment reliably generates a draft on schedule.\n- [ ] Users can review, approve, skip, or snooze drafts.\n\n## Notes\n\n- Use the product requirements in `docs/GITHUB_ISSUES_MVP.md` as the source of truth.\n"
+  },
+  {
+    "title": "EPIC-5: Email notifications for draft, payment, and shipping states",
+    "milestone": "phase-4",
+    "labels": ["epic", "backend"],
+    "body": "## Summary\n\nNotify users on key state transitions with deep links to relevant pages.\n\n## Acceptance Criteria\n\n- [ ] Emails are sent for draft-ready, payment-required, shipped, and failed states.\n- [ ] Notifications include links back to the relevant workflow.\n\n## Notes\n\n- Use the product requirements in `docs/GITHUB_ISSUES_MVP.md` as the source of truth.\n"
+  },
+  {
+    "title": "EPIC-6: Convert approved drafts into paid orders",
+    "milestone": "phase-5",
+    "labels": ["epic", "backend", "payments"],
+    "body": "## Summary\n\nImplement pricing and payment processing so approved drafts become paid orders.\n\n## Acceptance Criteria\n\n- [ ] Successful payment creates an order with correct totals.\n- [ ] Orders cannot proceed without successful payment.\n\n## Notes\n\n- Use the product requirements in `docs/GITHUB_ISSUES_MVP.md` as the source of truth.\n"
+  },
+  {
+    "title": "EPIC-7: Fulfill paid orders and track delivery status",
+    "milestone": "phase-6",
+    "labels": ["epic", "backend", "fulfillment", "infra"],
+    "body": "## Summary\n\nIntegrate provider order creation, upload assets, and synchronize shipment status.\n\n## Acceptance Criteria\n\n- [ ] Paid orders are submitted to the provider.\n- [ ] Status updates are visible in the product and traceable internally.\n\n## Notes\n\n- Use the product requirements in `docs/GITHUB_ISSUES_MVP.md` as the source of truth.\n"
+  },
+  {
+    "title": "EPIC-8: Give support tooling to resolve order issues",
+    "milestone": "phase-7",
+    "labels": ["epic", "backend", "frontend"],
+    "body": "## Summary\n\nProvide internal support tooling for order inspection, resend, and template management.\n\n## Acceptance Criteria\n\n- [ ] Support can inspect orders without database access.\n- [ ] Basic template management exists for admin workflows.\n\n## Notes\n\n- Use the product requirements in `docs/GITHUB_ISSUES_MVP.md` as the source of truth.\n"
+  },
+  {
+    "title": "EPIC-9: GDPR basics and content safety for order generation",
+    "milestone": "phase-7",
+    "labels": ["epic", "backend", "security", "compliance"],
+    "body": "## Summary\n\nProvide GDPR export and deletion flows plus MVP content filtering for abusive or unsafe message content.\n\n## Acceptance Criteria\n\n- [ ] Users can request export and deletion of personal data.\n- [ ] Blocked content cannot proceed into the order pipeline.\n\n## Notes\n\n- Use the product requirements in `docs/GITHUB_ISSUES_MVP.md` as the source of truth.\n"
+  },
+  {
+    "title": "TASK: Select print, storage, and delivery assumptions for MVP",
+    "milestone": "phase-0",
+    "labels": ["task", "infra", "fulfillment"],
+    "body": "## Objective\n\nChoose the MVP print-provider assumptions, object-storage shape, and delivery lead-time model so downstream rendering and fulfillment work can proceed without rework.\n\n## Checklist\n\n- [ ] Evaluate print provider API quality and required asset formats.\n- [ ] Confirm supported destinations and lead-time assumptions.\n- [ ] Confirm S3-compatible artifact storage requirements.\n- [ ] Record decisions as ADRs where architecture impact exists.\n\n## Validation\n\n- [ ] Decisions are written down in the repository and linked from the issue.\n"
+  },
+  {
+    "title": "TASK: Finalize staging and production hosting configuration",
+    "milestone": "phase-0",
+    "labels": ["task", "infra"],
+    "body": "## Objective\n\nConfirm the deployment targets and secret-management strategy for web, API, and worker services.\n\n## Checklist\n\n- [ ] Confirm Vercel, Railway, Postgres, Redis, and object storage choices.\n- [ ] Create provider projects and environments.\n- [ ] Define staging and production secret ownership.\n- [ ] Link the final setup back to `docs/DEPLOYMENT_PLAN.md`.\n\n## Validation\n\n- [ ] Hosting targets and required secrets are explicitly documented.\n"
+  },
+  {
+    "title": "TASK: Establish database and migration foundation for backend domains",
+    "milestone": "phase-1",
+    "labels": ["task", "backend", "infra"],
+    "body": "## Objective\n\nCreate the initial database and migration foundation so auth, contacts, templates, and orders can evolve on a stable persistence layer.\n\n## Checklist\n\n- [ ] Choose ORM or migration tool.\n- [ ] Add migration workflow and environment wiring.\n- [ ] Define the first schema boundaries for users and foundational entities.\n- [ ] Document how local and deployed databases are managed.\n\n## Validation\n\n- [ ] Migrations run deterministically in local development and CI.\n"
+  },
+  {
+    "title": "TASK: Scaffold auth module and email verification contract",
+    "milestone": "phase-1",
+    "labels": ["task", "backend", "frontend", "security"],
+    "body": "## Objective\n\nCreate the first auth and verification contract that will support gated checkout later.\n\n## Checklist\n\n- [ ] Define auth module boundaries.\n- [ ] Define signup, login, verification, and reset flows.\n- [ ] Establish token or session strategy.\n- [ ] Define the frontend-to-API contract for auth flows.\n\n## Validation\n\n- [ ] The auth boundary is documented and represented in code structure.\n"
+  }
+]

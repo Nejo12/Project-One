@@ -15,6 +15,8 @@
     "infra:down": "docker compose down",
     "infra:logs": "docker compose logs -f redis minio minio-init",
     "commitlint": "commitlint --edit",
+    "issues:seed": "node scripts/github/create-issues.mjs",
+    "issues:seed:apply": "node scripts/github/create-issues.mjs --apply",
     "lint": "npm -w api run lint && npm -w web run lint && npm -w web run stylelint && npm -w worker run lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
