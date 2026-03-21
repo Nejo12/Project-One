@@ -119,6 +119,7 @@ export interface CreateDraftParams {
 
 export interface DraftDueRecord {
   id: string;
+  userId: string;
   photoObjectId: string | null;
   photoFit: RenderPhotoFit | null;
   fieldValues: Record<string, string>;

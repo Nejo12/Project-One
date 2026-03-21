@@ -1,7 +1,7 @@
 export type MomentEventTypeValue = 'CONTACT_BIRTHDAY' | 'ONE_OFF_DATE';
 export type MomentDeliveryPreferenceValue = 'ARRIVE_BY' | 'SHIP_ON';
 export type MomentApprovalModeValue = 'ALWAYS_ASK';
-export type DraftStatusValue = 'SCHEDULED' | 'READY_FOR_REVIEW';
+export type DraftStatusValue = 'SCHEDULED' | 'PROCESSING' | 'READY_FOR_REVIEW';
 export type RenderPhotoFitValue = 'FIT' | 'COVER';
 
 export interface MomentContactSummaryView {
@@ -65,6 +65,12 @@ export interface MomentRuleListResponse {
 
 export interface DraftListResponse {
   drafts: DraftView[];
+}
+
+export interface DraftMaterializationResponse {
+  claimedDrafts: number;
+  processedDrafts: number;
+  failedDrafts: number;
 }
 
 export interface CreateMomentRuleRequestBody {

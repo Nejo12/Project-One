@@ -1,0 +1,1 @@
+ALTER TYPE "DraftStatus" ADD VALUE 'PROCESSING';

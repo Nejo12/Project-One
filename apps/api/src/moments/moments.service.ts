@@ -8,6 +8,7 @@ import { RenderingService } from '../rendering/rendering.service';
 import { StorageService } from '../storage/storage.service';
 import {
   CreateMomentRuleRequestBody,
+  DraftMaterializationResponse,
   DraftListResponse,
   DraftView,
   MomentRuleListResponse,
@@ -23,6 +24,7 @@ import {
 } from './moments.types';
 
 const dayInMilliseconds = 24 * 60 * 60 * 1000;
+const defaultDraftMaterializationBatchSize = 25;
 
 @Injectable()
 export class MomentsService {
@@ -33,7 +35,6 @@ export class MomentsService {
   ) {}
 
   async listMoments(userId: string): Promise<MomentRuleListResponse> {
-    await this.materializeDueDrafts(userId);
     const moments = await this.momentsRepository.listMomentsByUserId(userId);
 
     return {
@@ -42,7 +43,6 @@ export class MomentsService {
   }
 
   async listDrafts(userId: string): Promise<DraftListResponse> {
-    await this.materializeDueDrafts(userId);
     const drafts = await this.momentsRepository.listDraftsByUserId(userId);
 
     return {
@@ -126,8 +126,6 @@ export class MomentsService {
       renderPreviewId: null,
     });
 
-    await this.materializeDueDrafts(userId);
-
     const refreshedMoments =
       await this.momentsRepository.listMomentsByUserId(userId);
     const createdMoment = refreshedMoments.find(
@@ -157,20 +155,51 @@ export class MomentsService {
     return { deleted: true };
   }
 
-  private async materializeDueDrafts(userId: string): Promise<void> {
+  async materializeDueDrafts(
+    limit = defaultDraftMaterializationBatchSize,
+  ): Promise<DraftMaterializationResponse> {
     const dueDrafts =
-      await this.momentsRepository.listDueScheduledDraftsByUserId(userId);
+      await this.momentsRepository.listDueScheduledDrafts(limit);
+    let claimedDrafts = 0;
+    let processedDrafts = 0;
+    let failedDrafts = 0;
 
     for (const draft of dueDrafts) {
-      await this.materializeDraft(userId, draft);
+      const claimed = await this.momentsRepository.claimDraftForProcessing(
+        draft.id,
+      );
+      if (!claimed) {
+        continue;
+      }
+
+      claimedDrafts += 1;
+
+      try {
+        await this.materializeDraft(draft);
+        processedDrafts += 1;
+      } catch (error) {
+        failedDrafts += 1;
+        await this.momentsRepository.resetDraftToScheduled(draft.id);
+
+        if (error instanceof Error) {
+          console.error(
+            `moments: failed to materialize draft ${draft.id}: ${error.message}`,
+          );
+        } else {
+          console.error(`moments: failed to materialize draft ${draft.id}`);
+        }
+      }
     }
+
+    return {
+      claimedDrafts,
+      processedDrafts,
+      failedDrafts,
+    };
   }
 
-  private async materializeDraft(
-    userId: string,
-    draft: DraftDueRecord,
-  ): Promise<void> {
-    const preview = await this.renderingService.createPreview(userId, {
+  private async materializeDraft(draft: DraftDueRecord): Promise<void> {
+    const preview = await this.renderingService.createPreview(draft.userId, {
       templateSlug: draft.template.slug,
       fieldValues: draft.fieldValues,
       photoObjectId: draft.photoObjectId,

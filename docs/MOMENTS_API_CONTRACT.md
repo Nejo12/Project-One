@@ -46,8 +46,19 @@ Returns the current user's scheduled and ready-for-review drafts.
 
 Behavior:
 
-- if a scheduled draft is already due, the API materializes its render preview before responding
-- due drafts transition from `SCHEDULED` to `READY_FOR_REVIEW`
+- the API reports persisted draft state only; it does not materialize due drafts during read requests
+- a background worker claims due drafts, renders previews, and transitions them from `SCHEDULED` to `READY_FOR_REVIEW`
+
+## `POST /internal/drafts/materialize-due`
+
+Internal worker-only endpoint for claiming and materializing due drafts in batches.
+
+Behavior:
+
+- requires the `x-internal-worker-token` header
+- claims only drafts still in `SCHEDULED` status
+- transitions claimed drafts to `PROCESSING` while rendering is underway
+- returns batch counts for claimed, processed, and failed drafts
 
 ## `DELETE /moments/:momentId`
 

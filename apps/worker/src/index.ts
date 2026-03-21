@@ -10,8 +10,11 @@ type RedisJobData = {
 };
 
 const REDIS_URL = process.env.REDIS_URL ?? "redis://localhost:6379";
+const API_BASE_URL = process.env.API_BASE_URL ?? "http://localhost:3001";
+const INTERNAL_WORKER_TOKEN = process.env.INTERNAL_WORKER_TOKEN ?? "change-me";
 const S3_ENDPOINT = process.env.S3_ENDPOINT ?? "http://localhost:9000";
 const S3_BUCKET = process.env.S3_BUCKET ?? "moments-dev";
+const DRAFT_SCHEDULER_INTERVAL_MS = Number(process.env.DRAFT_SCHEDULER_INTERVAL_MS ?? 30000);
 
 // S3 client is created up-front so later job processors can upload artifacts.
 const s3Client = new S3Client({
@@ -34,6 +37,7 @@ const connection = {
 const queueName = "template-rendering";
 
 let worker: Worker<RedisJobData, void> | null = null;
+let draftSchedulerInterval: ReturnType<typeof setInterval> | null = null;
 
 async function renderPdfStub(_jobData: RedisJobData): Promise<void> {
   // Stub: we only verify Chromium launch works; real template rendering comes later.
@@ -65,14 +69,46 @@ async function assertRedisAvailable(): Promise<void> {
 }
 
 async function shutdown(): Promise<void> {
+  if (draftSchedulerInterval) {
+    clearInterval(draftSchedulerInterval);
+    draftSchedulerInterval = null;
+  }
+
   if (worker) {
     await worker.close();
+  }
+}
+
+async function triggerDraftMaterialization(): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/internal/drafts/materialize-due`, {
+    method: "POST",
+    headers: {
+      "x-internal-worker-token": INTERNAL_WORKER_TOKEN,
+    },
+  });
+
+  if (!response.ok) {
+    const responseBody = await response.text();
+    throw new Error(`Draft materialization request failed (${response.status}): ${responseBody}`);
+  }
+
+  const payload = (await response.json()) as {
+    claimedDrafts: number;
+    processedDrafts: number;
+    failedDrafts: number;
+  };
+
+  if (payload.claimedDrafts > 0 || payload.processedDrafts > 0 || payload.failedDrafts > 0) {
+    console.log(
+      `worker: draft batch claimed=${payload.claimedDrafts} processed=${payload.processedDrafts} failed=${payload.failedDrafts}`,
+    );
   }
 }
 
 async function startWorker(): Promise<void> {
   console.log(`worker: listening on Redis (${REDIS_URL}) for queue "${queueName}"`);
   console.log(`worker: target bucket "${S3_BUCKET}" via ${S3_ENDPOINT}`);
+  console.log(`worker: scheduler polling ${API_BASE_URL} every ${DRAFT_SCHEDULER_INTERVAL_MS}ms`);
 
   await assertRedisAvailable();
 
@@ -91,6 +127,17 @@ async function startWorker(): Promise<void> {
   worker.on("failed", (job, err) => {
     console.error(`worker: failed job ${job?.id} (${queueName}):`, err);
   });
+
+  await triggerDraftMaterialization();
+  draftSchedulerInterval = setInterval(() => {
+    void triggerDraftMaterialization().catch((error: unknown) => {
+      if (error instanceof Error) {
+        console.error(`worker: scheduler failed: ${error.message}`);
+      } else {
+        console.error("worker: scheduler failed", error);
+      }
+    });
+  }, DRAFT_SCHEDULER_INTERVAL_MS);
 }
 
 process.on("SIGINT", () => {

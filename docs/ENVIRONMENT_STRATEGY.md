@@ -47,6 +47,7 @@ Only the web app may expose browser-safe variables, and they must use the `NEXT_
 - Server-only:
   - `DATABASE_URL`
   - `REDIS_URL`
+  - `INTERNAL_WORKER_TOKEN`
   - `JWT_SECRET`
   - `STRIPE_SECRET_KEY`
   - `STRIPE_WEBHOOK_SECRET`
@@ -57,17 +58,18 @@ Only the web app may expose browser-safe variables, and they must use the `NEXT_
 
 ### Shared local development reference
 
-| Variable               | Local         | CI     | Preview      | Staging      | Production   | Notes                                    |
-| ---------------------- | ------------- | ------ | ------------ | ------------ | ------------ | ---------------------------------------- |
-| `NODE_ENV`             | `development` | `test` | `production` | `production` | `production` | Runtime mode                             |
-| `WEB_APP_URL`          | Required      | No     | Optional     | Required     | Required     | Shared local reference only              |
-| `API_BASE_URL`         | Required      | No     | Optional     | Required     | Required     | Shared local reference only              |
-| `DATABASE_URL`         | Required      | No     | Required     | Required     | Required     | Primary application database             |
-| `REDIS_URL`            | Required      | No     | Required     | Required     | Required     | Queue backing service                    |
-| `S3_ENDPOINT`          | Required      | No     | Required     | Required     | Required     | Local MinIO, remote object storage later |
-| `S3_BUCKET`            | Required      | No     | Required     | Required     | Required     | Artifact bucket                          |
-| `S3_ACCESS_KEY_ID`     | Required      | No     | Required     | Required     | Required     | Secret outside local examples            |
-| `S3_SECRET_ACCESS_KEY` | Required      | No     | Required     | Required     | Required     | Secret outside local examples            |
+| Variable                | Local         | CI     | Preview      | Staging      | Production   | Notes                                    |
+| ----------------------- | ------------- | ------ | ------------ | ------------ | ------------ | ---------------------------------------- |
+| `NODE_ENV`              | `development` | `test` | `production` | `production` | `production` | Runtime mode                             |
+| `WEB_APP_URL`           | Required      | No     | Optional     | Required     | Required     | Shared local reference only              |
+| `API_BASE_URL`          | Required      | No     | Optional     | Required     | Required     | Shared local reference only              |
+| `INTERNAL_WORKER_TOKEN` | Required      | No     | Required     | Required     | Required     | Shared secret between API and worker     |
+| `DATABASE_URL`          | Required      | No     | Required     | Required     | Required     | Primary application database             |
+| `REDIS_URL`             | Required      | No     | Required     | Required     | Required     | Queue backing service                    |
+| `S3_ENDPOINT`           | Required      | No     | Required     | Required     | Required     | Local MinIO, remote object storage later |
+| `S3_BUCKET`             | Required      | No     | Required     | Required     | Required     | Artifact bucket                          |
+| `S3_ACCESS_KEY_ID`      | Required      | No     | Required     | Required     | Required     | Secret outside local examples            |
+| `S3_SECRET_ACCESS_KEY`  | Required      | No     | Required     | Required     | Required     | Secret outside local examples            |
 
 ### Web app
 
@@ -90,18 +92,22 @@ Only the web app may expose browser-safe variables, and they must use the `NEXT_
 | `STRIPE_SECRET_KEY`     | Optional now | No  | Optional now | Required when payments ship | Required when payments ship | Secret                     |
 | `STRIPE_WEBHOOK_SECRET` | Optional now | No  | Optional now | Required when payments ship | Required when payments ship | Secret                     |
 | `JWT_SECRET`            | Required     | No  | Required     | Required                    | Required                    | Secret                     |
+| `INTERNAL_WORKER_TOKEN` | Required     | No  | Required     | Required                    | Required                    | Shared worker secret       |
 | `EMAIL_FROM`            | Required     | No  | Required     | Required                    | Required                    | Sender identity            |
 
 ### Worker app
 
-| Variable               | Local    | CI  | Preview  | Staging  | Production | Notes         |
-| ---------------------- | -------- | --- | -------- | -------- | ---------- | ------------- |
-| `REDIS_URL`            | Required | No  | Required | Required | Required   | Server-only   |
-| `S3_ENDPOINT`          | Required | No  | Required | Required | Required   | Server-only   |
-| `S3_BUCKET`            | Required | No  | Required | Required | Required   | Server-only   |
-| `S3_ACCESS_KEY_ID`     | Required | No  | Required | Required | Required   | Secret        |
-| `S3_SECRET_ACCESS_KEY` | Required | No  | Required | Required | Required   | Secret        |
-| `RENDER_TIMEOUT_MS`    | Optional | No  | Optional | Optional | Optional   | Worker tuning |
+| Variable                      | Local    | CI  | Preview  | Staging  | Production | Notes                         |
+| ----------------------------- | -------- | --- | -------- | -------- | ---------- | ----------------------------- |
+| `REDIS_URL`                   | Required | No  | Required | Required | Required   | Server-only                   |
+| `API_BASE_URL`                | Required | No  | Required | Required | Required   | Worker callback target        |
+| `INTERNAL_WORKER_TOKEN`       | Required | No  | Required | Required | Required   | Shared worker secret          |
+| `S3_ENDPOINT`                 | Required | No  | Required | Required | Required   | Server-only                   |
+| `S3_BUCKET`                   | Required | No  | Required | Required | Required   | Server-only                   |
+| `S3_ACCESS_KEY_ID`            | Required | No  | Required | Required | Required   | Secret                        |
+| `S3_SECRET_ACCESS_KEY`        | Required | No  | Required | Required | Required   | Secret                        |
+| `RENDER_TIMEOUT_MS`           | Optional | No  | Optional | Optional | Optional   | Worker tuning                 |
+| `DRAFT_SCHEDULER_INTERVAL_MS` | Optional | No  | Optional | Optional | Optional   | Due-draft poll interval in ms |
 
 ## CI Policy
 

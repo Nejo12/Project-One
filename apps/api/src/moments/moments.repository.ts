@@ -229,10 +229,9 @@ export class MomentsRepository {
     });
   }
 
-  listDueScheduledDraftsByUserId(userId: string): Promise<DraftDueRecord[]> {
+  listDueScheduledDrafts(limit: number): Promise<DraftDueRecord[]> {
     return this.prisma.draft.findMany({
       where: {
-        userId,
         status: 'SCHEDULED',
         draftReadyAt: {
           lte: new Date(),
@@ -240,8 +239,10 @@ export class MomentsRepository {
         renderPreviewId: null,
       },
       orderBy: [{ draftReadyAt: 'asc' }, { createdAt: 'asc' }],
+      take: limit,
       select: {
         id: true,
+        userId: true,
         photoObjectId: true,
         photoFit: true,
         fieldValues: true,
@@ -257,6 +258,21 @@ export class MomentsRepository {
     }) as Promise<DraftDueRecord[]>;
   }
 
+  claimDraftForProcessing(draftId: string): Promise<boolean> {
+    return this.prisma.draft
+      .updateMany({
+        where: {
+          id: draftId,
+          status: 'SCHEDULED',
+          renderPreviewId: null,
+        },
+        data: {
+          status: 'PROCESSING',
+        },
+      })
+      .then((result: { count: number }) => result.count > 0);
+  }
+
   updateDraftAsReadyForReview(
     draftId: string,
     renderPreviewId: string,
@@ -269,6 +285,19 @@ export class MomentsRepository {
         data: {
           status: 'READY_FOR_REVIEW',
           renderPreviewId,
+        },
+      })
+      .then(() => undefined);
+  }
+
+  resetDraftToScheduled(draftId: string): Promise<void> {
+    return this.prisma.draft
+      .update({
+        where: {
+          id: draftId,
+        },
+        data: {
+          status: 'SCHEDULED',
         },
       })
       .then(() => undefined);

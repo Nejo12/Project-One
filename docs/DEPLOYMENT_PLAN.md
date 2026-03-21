@@ -85,6 +85,7 @@ Store runtime secrets in the hosting platform for the service that uses them.
 - Vercel:
   - `NEXT_PUBLIC_API_URL`
 - Railway API:
+  - `APP_BASE_URL`
   - `DATABASE_URL`
   - `REDIS_URL`
   - `S3_ENDPOINT`
@@ -94,14 +95,18 @@ Store runtime secrets in the hosting platform for the service that uses them.
   - `STRIPE_SECRET_KEY`
   - `STRIPE_WEBHOOK_SECRET`
   - `JWT_SECRET`
+  - `INTERNAL_WORKER_TOKEN`
   - `EMAIL_FROM`
 - Railway Worker:
   - `REDIS_URL`
+  - `API_BASE_URL`
+  - `INTERNAL_WORKER_TOKEN`
   - `S3_ENDPOINT`
   - `S3_BUCKET`
   - `S3_ACCESS_KEY_ID`
   - `S3_SECRET_ACCESS_KEY`
   - `RENDER_TIMEOUT_MS`
+  - `DRAFT_SCHEDULER_INTERVAL_MS`
 
 ## Rollout Priorities
 
