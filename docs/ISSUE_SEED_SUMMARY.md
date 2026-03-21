@@ -4,6 +4,18 @@ The repository now includes a seed file and helper script for creating the first
 
 It also includes tracked label and milestone seeds so the GitHub backlog can be bootstrapped in the correct order.
 
+## Important Note
+
+The seed file is for bootstrap, not for day-to-day execution control.
+
+After the initial epics and foundational tasks exist on GitHub:
+
+- close delivered issues aggressively
+- create only the next few focused execution issues
+- do not keep every future idea open at once
+
+The active execution order now lives in [`docs/ISSUE_OPERATIONS.md`](./ISSUE_OPERATIONS.md) and should match the live GitHub tracker.
+
 ## Included In The Seed
 
 - all product epics from the MVP backlog

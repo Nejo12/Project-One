@@ -1,5 +1,38 @@
 ## MVP GitHub Issue Backlog (Epics -> User Stories -> Tasks)
 
+## Current Execution Reality
+
+This document is the planning source of truth, but not every item below belongs in the active GitHub tracker at the same time.
+
+As of the current delivery state:
+
+- auth, sender readiness, contacts, addresses, template catalog, editor, storage, rendering preview, and moment-rule creation are already implemented
+- draft review and approval are not implemented
+- pricing, checkout, orders, fulfillment, and lifecycle notifications are not implemented
+- print-ready PDF generation is not complete; the current rendering boundary is still preview-oriented
+
+Use the live tracker to focus only on the next MVP-critical path:
+
+1. fix production deployment truth and CORS drift
+2. move draft generation to background scheduling
+3. add draft review, approve, skip, snooze, and re-edit flow
+4. add an order domain and draft-to-order conversion
+5. implement pricing
+6. integrate Stripe checkout and webhooks
+7. generate immutable printable assets for orders
+8. submit paid orders to a print provider and track status
+9. add lifecycle email delivery
+
+Explicitly defer these unless they block MVP delivery:
+
+- CSV import
+- admin tooling
+- advanced address validation provider integration
+- subscriptions
+- AI suggestions
+- multi-sender flows
+- compliance extras beyond baseline placeholders
+
 ### Minimal label scheme
 
 - `epic`

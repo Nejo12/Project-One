@@ -1,5 +1,27 @@
 ## Product Proposal: Moments-to-Mail Automation
 
+## Current Delivery Note
+
+The proposal still describes the intended MVP, but implementation should now stay tightly focused on the shortest path to a real paid and fulfilled order flow.
+
+That means the near-term priority is:
+
+1. draft review and approval
+2. background scheduling
+3. orders
+4. pricing and checkout
+5. fulfillment
+6. lifecycle notifications
+
+These items are explicitly secondary until the order pipeline is real:
+
+- CSV import
+- admin tooling
+- advanced address validation
+- subscriptions
+- AI suggestions
+- broader compliance tooling beyond MVP placeholders
+
 ### One-line
 
 An app that automatically prepares and sends personalized physical mail (cards/postcards/puzzle cards/letters) based on user-defined life events, with optional "auto-send" approval rules.
