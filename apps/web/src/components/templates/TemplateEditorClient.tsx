@@ -8,7 +8,7 @@ import { TemplatePreviewSurface } from "@/components/templates/TemplatePreviewSu
 import { ActionLink } from "@/components/ui/ActionLink";
 import { PanelSurface } from "@/components/ui/PanelSurface";
 import { StatusPill } from "@/components/ui/StatusPill";
-import { readStoredAuthSession } from "@/lib/auth-session";
+import { useStoredAuthSession } from "@/lib/auth-session";
 import { createRenderPreview } from "@/lib/rendering-api";
 import { RenderPreviewView } from "@/lib/rendering-contract";
 import { listPhotoUploads, uploadPhoto } from "@/lib/storage-api";
@@ -32,7 +32,7 @@ export function TemplateEditorClient({ templateSlug }: TemplateEditorClientProps
   const [isPending, startTransition] = useTransition();
   const [isUploadingPhoto, startPhotoUploadTransition] = useTransition();
   const [isGeneratingServerPreview, startServerPreviewTransition] = useTransition();
-  const storedSession = readStoredAuthSession();
+  const storedSession = useStoredAuthSession();
   const accessToken = storedSession?.session.accessToken ?? null;
   const [template, setTemplate] = useState<TemplateView | null>(null);
   const [fieldValues, setFieldValues] = useState<TemplateEditorFieldValues>({});

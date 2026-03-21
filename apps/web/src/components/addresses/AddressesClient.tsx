@@ -8,7 +8,7 @@ import {
   countryOptions,
   getCountryLabel,
 } from "@/lib/addresses-contract";
-import { readStoredAuthSession } from "@/lib/auth-session";
+import { useStoredAuthSession } from "@/lib/auth-session";
 import { AuthField } from "@/components/auth/AuthField";
 import { AuthFormCard } from "@/components/auth/AuthFormCard";
 import { AuthMessage } from "@/components/auth/AuthMessage";
@@ -27,7 +27,7 @@ const emptyForm = {
 };
 
 export function AddressesClient() {
-  const storedSession = readStoredAuthSession();
+  const storedSession = useStoredAuthSession();
   const accessToken = storedSession?.session.accessToken ?? null;
   const [isPending, startTransition] = useTransition();
   const [search, setSearch] = useState("");

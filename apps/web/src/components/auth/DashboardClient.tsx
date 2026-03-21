@@ -5,7 +5,7 @@ import { useEffect, useState, useTransition } from "react";
 import { getCurrentUser, getSenderProfile } from "@/lib/auth-api";
 import {
   clearStoredAuthSession,
-  readStoredAuthSession,
+  useStoredAuthSession,
   writeStoredAuthSession,
 } from "@/lib/auth-session";
 import { AuthUserView, SenderProfileReadinessView } from "@/lib/auth-contract";
@@ -15,14 +15,13 @@ import { ActionLink } from "@/components/ui/ActionLink";
 import { StatusPill } from "@/components/ui/StatusPill";
 
 export function DashboardClient() {
-  const [storedSession, setStoredSession] = useState(() => readStoredAuthSession());
+  const storedSession = useStoredAuthSession();
   const [isRefreshing, startTransition] = useTransition();
-  const [user, setUser] = useState<AuthUserView | null>(storedSession?.user ?? null);
+  const [validatedUser, setValidatedUser] = useState<AuthUserView | null>(null);
   const [profileReadiness, setProfileReadiness] = useState<SenderProfileReadinessView | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(
-    storedSession ? null : "No local auth session is stored yet.",
-  );
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const user = storedSession ? (validatedUser ?? storedSession.user) : null;
 
   useEffect(() => {
     if (!storedSession) {
@@ -39,12 +38,12 @@ export function DashboardClient() {
           user: meResponse.user,
           session: storedSession.session,
         });
-        setUser(meResponse.user);
+        setValidatedUser(meResponse.user);
         setProfileReadiness(senderProfileResponse.readiness);
         setStatusMessage("Session is active and the API accepted the stored token.");
       } catch (error) {
         clearStoredAuthSession();
-        setUser(null);
+        setValidatedUser(null);
         setProfileReadiness(null);
         setErrorMessage(
           error instanceof Error ? error.message : "Unable to validate the current auth session.",
@@ -55,8 +54,7 @@ export function DashboardClient() {
 
   function handleSignOut() {
     clearStoredAuthSession();
-    setStoredSession(null);
-    setUser(null);
+    setValidatedUser(null);
     setProfileReadiness(null);
     setStatusMessage(null);
     setErrorMessage("Local session cleared.");
@@ -168,6 +166,8 @@ export function DashboardClient() {
           </div>
         ) : isRefreshing ? (
           <AuthMessage tone="info">Checking the stored session with the API.</AuthMessage>
+        ) : !storedSession ? (
+          <AuthMessage tone="error">No local auth session is stored yet.</AuthMessage>
         ) : null}
       </div>
     </AuthFormCard>
