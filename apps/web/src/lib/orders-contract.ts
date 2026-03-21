@@ -1,4 +1,5 @@
 import { RenderPhotoFitValue } from "@/lib/moments-contract";
+import { ShippingTypeValue, ShippingZoneValue } from "@/lib/pricing-contract";
 
 export type OrderStatusValue =
   | "AWAITING_PAYMENT"
@@ -21,6 +22,16 @@ export interface OrderView {
   artifactObjectId: string;
   photoObjectId: string | null;
   status: OrderStatusValue;
+  shippingType: ShippingTypeValue | null;
+  shippingZone: ShippingZoneValue | null;
+  currency: string | null;
+  subtotalCents: number | null;
+  taxCents: number | null;
+  totalCents: number | null;
+  stripeCheckoutSessionId: string | null;
+  stripePaymentIntentId: string | null;
+  paidAt: string | null;
+  lastPaymentError: string | null;
   headline: string;
   message: string;
   fieldValues: Record<string, string>;

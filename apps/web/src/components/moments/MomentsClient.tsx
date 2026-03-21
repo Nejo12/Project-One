@@ -29,6 +29,7 @@ import {
 } from "@/lib/moments-contract";
 import { createOrderFromDraft, listOrders } from "@/lib/orders-api";
 import { OrderView } from "@/lib/orders-contract";
+import { createCheckoutSession } from "@/lib/payments-api";
 import { getOrderPricing } from "@/lib/pricing-api";
 import { OrderPricingView, ShippingTypeValue } from "@/lib/pricing-contract";
 import { listPhotoUploads, uploadPhoto } from "@/lib/storage-api";
@@ -414,6 +415,28 @@ export function MomentsClient() {
     });
   }
 
+  function handleCheckout(orderId: string) {
+    if (!accessToken) {
+      return;
+    }
+
+    const shippingType = shippingTypes[orderId] ?? "STANDARD";
+
+    setStatusMessage(null);
+    setErrorMessage(null);
+
+    startSubmitTransition(async () => {
+      try {
+        const response = await createCheckoutSession(accessToken, orderId, {
+          shippingType,
+        });
+        window.location.assign(response.checkoutUrl);
+      } catch (error) {
+        setErrorMessage(error instanceof Error ? error.message : "Unable to start checkout.");
+      }
+    });
+  }
+
   if (!accessToken) {
     return <AuthMessage tone="error">Sign in first to manage moments.</AuthMessage>;
   }
@@ -766,6 +789,17 @@ export function MomentsClient() {
                               >
                                 {pricingQuote ? "Refresh pricing" : "Estimate total"}
                               </button>
+
+                              {pricingQuote ? (
+                                <button
+                                  type="button"
+                                  className="inline-flex min-h-10 items-center justify-center rounded-full bg-accent px-4 py-2 text-xs font-semibold tracking-[0.12em] text-white uppercase transition-colors hover:bg-accent-strong disabled:cursor-not-allowed disabled:bg-accent/45"
+                                  disabled={isSubmitting}
+                                  onClick={() => handleCheckout(relatedOrder.id)}
+                                >
+                                  Proceed to checkout
+                                </button>
+                              ) : null}
                             </div>
 
                             {pricingQuote ? (

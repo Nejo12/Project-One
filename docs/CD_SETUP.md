@@ -102,6 +102,8 @@ For each Railway service:
    - `api`
      - `APP_BASE_URL`
      - `INTERNAL_WORKER_TOKEN`
+     - `STRIPE_SECRET_KEY`
+     - `STRIPE_WEBHOOK_SECRET`
    - `worker`
      - `API_BASE_URL`
      - `INTERNAL_WORKER_TOKEN`

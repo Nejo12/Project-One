@@ -79,21 +79,21 @@ Only the web app may expose browser-safe variables, and they must use the `NEXT_
 
 ### API app
 
-| Variable                | Local        | CI  | Preview      | Staging                     | Production                  | Notes                      |
-| ----------------------- | ------------ | --- | ------------ | --------------------------- | --------------------------- | -------------------------- |
-| `PORT`                  | Required     | No  | Required     | Required                    | Required                    | Defaults to `3001` locally |
-| `APP_BASE_URL`          | Required     | No  | Required     | Required                    | Required                    | Current local web origin   |
-| `DATABASE_URL`          | Required     | No  | Required     | Required                    | Required                    | Server-only                |
-| `REDIS_URL`             | Required     | No  | Required     | Required                    | Required                    | Server-only                |
-| `S3_ENDPOINT`           | Required     | No  | Required     | Required                    | Required                    | Server-only                |
-| `S3_BUCKET`             | Required     | No  | Required     | Required                    | Required                    | Server-only                |
-| `S3_ACCESS_KEY_ID`      | Required     | No  | Required     | Required                    | Required                    | Secret                     |
-| `S3_SECRET_ACCESS_KEY`  | Required     | No  | Required     | Required                    | Required                    | Secret                     |
-| `STRIPE_SECRET_KEY`     | Optional now | No  | Optional now | Required when payments ship | Required when payments ship | Secret                     |
-| `STRIPE_WEBHOOK_SECRET` | Optional now | No  | Optional now | Required when payments ship | Required when payments ship | Secret                     |
-| `JWT_SECRET`            | Required     | No  | Required     | Required                    | Required                    | Secret                     |
-| `INTERNAL_WORKER_TOKEN` | Required     | No  | Required     | Required                    | Required                    | Shared worker secret       |
-| `EMAIL_FROM`            | Required     | No  | Required     | Required                    | Required                    | Sender identity            |
+| Variable                | Local    | CI  | Preview  | Staging  | Production | Notes                      |
+| ----------------------- | -------- | --- | -------- | -------- | ---------- | -------------------------- |
+| `PORT`                  | Required | No  | Required | Required | Required   | Defaults to `3001` locally |
+| `APP_BASE_URL`          | Required | No  | Required | Required | Required   | Current local web origin   |
+| `DATABASE_URL`          | Required | No  | Required | Required | Required   | Server-only                |
+| `REDIS_URL`             | Required | No  | Required | Required | Required   | Server-only                |
+| `S3_ENDPOINT`           | Required | No  | Required | Required | Required   | Server-only                |
+| `S3_BUCKET`             | Required | No  | Required | Required | Required   | Server-only                |
+| `S3_ACCESS_KEY_ID`      | Required | No  | Required | Required | Required   | Secret                     |
+| `S3_SECRET_ACCESS_KEY`  | Required | No  | Required | Required | Required   | Secret                     |
+| `STRIPE_SECRET_KEY`     | Required | No  | Required | Required | Required   | Secret                     |
+| `STRIPE_WEBHOOK_SECRET` | Required | No  | Required | Required | Required   | Secret                     |
+| `JWT_SECRET`            | Required | No  | Required | Required | Required   | Secret                     |
+| `INTERNAL_WORKER_TOKEN` | Required | No  | Required | Required | Required   | Shared worker secret       |
+| `EMAIL_FROM`            | Required | No  | Required | Required | Required   | Sender identity            |
 
 ### Worker app
 

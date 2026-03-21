@@ -1,4 +1,9 @@
-import { Order, RenderPhotoFit } from '@prisma/client';
+import {
+  Order,
+  RenderPhotoFit,
+  ShippingType,
+  ShippingZone,
+} from '@prisma/client';
 
 export type OrderRecord = Pick<
   Order,
@@ -14,6 +19,16 @@ export type OrderRecord = Pick<
   | 'artifactObjectId'
   | 'photoObjectId'
   | 'status'
+  | 'shippingType'
+  | 'shippingZone'
+  | 'currency'
+  | 'subtotalCents'
+  | 'taxCents'
+  | 'totalCents'
+  | 'stripeCheckoutSessionId'
+  | 'stripePaymentIntentId'
+  | 'paidAt'
+  | 'lastPaymentError'
   | 'headline'
   | 'message'
   | 'fieldValues'
@@ -69,6 +84,16 @@ export interface CreateOrderParams {
   artifactObjectId: string;
   photoObjectId: string | null;
   status: 'AWAITING_PAYMENT';
+  shippingType?: ShippingType | null;
+  shippingZone?: ShippingZone | null;
+  currency?: string | null;
+  subtotalCents?: number | null;
+  taxCents?: number | null;
+  totalCents?: number | null;
+  stripeCheckoutSessionId?: string | null;
+  stripePaymentIntentId?: string | null;
+  paidAt?: Date | null;
+  lastPaymentError?: string | null;
   headline: string;
   message: string;
   fieldValues: Record<string, string>;

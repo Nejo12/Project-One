@@ -90,6 +90,16 @@ enum OrderStatus {
   CANCELLED
 }
 
+enum ShippingType {
+  STANDARD
+  PRIORITY
+}
+
+enum ShippingZone {
+  DOMESTIC
+  INTERNATIONAL
+}
+
 model User {
   id                  String                   @id @default(cuid())
   email               String                   @unique
@@ -104,6 +114,7 @@ model User {
   drafts              Draft[]
   momentRules         MomentRule[]
   orders              Order[]
+  paymentEvents       PaymentWebhookEvent[]
   profile             SenderProfile?
   renderPreviews      RenderPreview[]
   storedObjects       StoredObject[]
@@ -351,6 +362,16 @@ model Order {
   artifactObjectId  String
   photoObjectId     String?
   status            OrderStatus    @default(AWAITING_PAYMENT)
+  shippingType      ShippingType?
+  shippingZone      ShippingZone?
+  currency          String?
+  subtotalCents     Int?
+  taxCents          Int?
+  totalCents        Int?
+  stripeCheckoutSessionId String?  @unique
+  stripePaymentIntentId   String?  @unique
+  paidAt            DateTime?
+  lastPaymentError  String?
   headline          String
   message           String
   fieldValues       Json
@@ -365,6 +386,18 @@ model Order {
 
   @@index([userId, status, createdAt])
   @@index([artifactObjectId])
+}
+
+model PaymentWebhookEvent {
+  id            String   @id @default(cuid())
+  userId        String?
+  stripeEventId String   @unique
+  eventType     String
+  createdAt     DateTime @default(now())
+  processedAt   DateTime @default(now())
+  user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([eventType, processedAt])
 }
 
 model PasswordResetToken {
