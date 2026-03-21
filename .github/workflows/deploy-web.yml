@@ -1,24 +1,6 @@
 name: Deploy Web
 
 on:
-  pull_request:
-    branches:
-      - main
-    paths:
-      - "apps/web/**"
-      - "packages/**"
-      - "package.json"
-      - "package-lock.json"
-      - ".github/workflows/deploy-web.yml"
-  push:
-    branches:
-      - main
-    paths:
-      - "apps/web/**"
-      - "packages/**"
-      - "package.json"
-      - "package-lock.json"
-      - ".github/workflows/deploy-web.yml"
   workflow_dispatch:
     inputs:
       target:
@@ -34,16 +16,53 @@ permissions:
   contents: read
 
 concurrency:
-  group: deploy-web-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || github.ref_name }}-${{ github.event_name == 'workflow_dispatch' && github.event.inputs.target || 'auto' }}
+  group: deploy-web-${{ github.event.inputs.target }}
   cancel-in-progress: true
 
 env:
   NODE_VERSION: 22
 
 jobs:
+  validate:
+    name: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Validate required Vercel secrets
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID_WEB: ${{ secrets.VERCEL_PROJECT_ID_WEB }}
+        run: |
+          missing=""
+
+          for secret_name in VERCEL_TOKEN VERCEL_ORG_ID VERCEL_PROJECT_ID_WEB; do
+            eval "secret_value=\${${secret_name}}"
+            if [ -z "${secret_value}" ]; then
+              missing="${missing} ${secret_name}"
+            fi
+          done
+
+          if [ -n "${missing}" ]; then
+            echo "Missing required secrets:${missing}" >&2
+            exit 1
+          fi
+
+      - name: Add workflow summary
+        run: |
+          {
+            echo "## Web Deployment"
+            echo
+            echo "- target: ${{ github.event.inputs.target }}"
+            echo "- trigger: manual fallback workflow"
+            echo "- provider of record: Vercel native Git deployment"
+          } >> "${GITHUB_STEP_SUMMARY}"
+
   deploy-preview:
     name: deploy-preview
-    if: ${{ (github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'preview')) && secrets.VERCEL_TOKEN != '' && secrets.VERCEL_ORG_ID != '' && secrets.VERCEL_PROJECT_ID_WEB != '' }}
+    if: ${{ github.event.inputs.target == 'preview' }}
+    needs: validate
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: preview
@@ -98,7 +117,8 @@ jobs:
 
   deploy-production:
     name: deploy-production
-    if: ${{ ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'production')) && secrets.VERCEL_TOKEN != '' && secrets.VERCEL_ORG_ID != '' && secrets.VERCEL_PROJECT_ID_WEB != '' }}
+    if: ${{ github.event.inputs.target == 'production' }}
+    needs: validate
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: production

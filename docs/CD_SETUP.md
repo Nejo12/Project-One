@@ -10,17 +10,17 @@ This document defines the repository-side deployment automation that now exists,
 ## Deployment Model
 
 - `web`
-  - preview deploys on pull requests that touch the web app
-  - production deploys on pushes to `main`
-  - manual preview or production deploys are also available through `workflow_dispatch`
+  - Vercel native Git deployment is the production source of truth
+  - preview deployments come from Vercel, not from GitHub Actions
+  - manual preview or production deploys are available through `workflow_dispatch` as a fallback
 - `api`
-  - staging deploys are manual through `workflow_dispatch`
-  - production deploys trigger on pushes to `main`
+  - Railway native Git deployment is the production source of truth
+  - staging or production deploys are available through `workflow_dispatch` as a fallback
 - `worker`
-  - staging deploys are manual through `workflow_dispatch`
-  - production deploys trigger on pushes to `main`
+  - Railway native Git deployment is the production source of truth
+  - staging or production deploys are available through `workflow_dispatch` as a fallback
 
-This matches the current baseline in [`DEPLOYMENT_PLAN.md`](./DEPLOYMENT_PLAN.md): preview automation for the web app, controlled staging deploys, and production deploys from protected `main`.
+This matches the current baseline in [`DEPLOYMENT_PLAN.md`](./DEPLOYMENT_PLAN.md): provider-native Git deployment is the default path, and GitHub Actions remains an explicit fallback when you need to force a deploy from the repository side.
 
 ## Required GitHub Secrets
 
@@ -73,10 +73,13 @@ Generate the Vercel token from a maintainer account, then capture the project an
 
 ### Railway
 
-Create separate services for:
+Create separate services or resources for:
 
 - `api`
 - `worker`
+- `Postgres`
+- `Redis`
+- object storage bucket
 
 Create them in both:
 
@@ -95,24 +98,22 @@ For each Railway service:
    - `worker`
      - build: `npm -w worker run build`
      - start: `npm -w worker run start`
-5. generate a deploy hook URL
+5. generate a deploy hook URL if you want to use the manual fallback workflows
 6. store that deploy hook URL in the matching GitHub secret
 
 ## Workflow Behavior
 
 ### `deploy-web`
 
-- Runs on pull requests and on pushes to `main`.
-- Preview deploys require Vercel secrets to be present.
-- Production deploys require Vercel secrets to be present.
-- If secrets are missing, the deploy job is skipped rather than failing unrelated pushes.
+- Runs only through `workflow_dispatch`.
+- Validates required Vercel secrets before trying to deploy.
+- Exists as a manual fallback when you need to force a deploy outside Vercel's native Git integration.
 
 ### `deploy-services`
 
-- Runs on pushes to `main` for production service deploys.
 - Supports manual staging or production deploys through `workflow_dispatch`.
 - Uses Railway deploy hooks so GitHub does not need long-lived runtime credentials for the services.
-- If the relevant deploy hook secret is missing, that job is skipped.
+- Validates the relevant deploy-hook secret before trying to deploy.
 
 ## Rollout Checklist
 
@@ -123,7 +124,7 @@ For each Railway service:
 5. Add runtime variables on Vercel and Railway.
 6. Run the `deploy-web` workflow manually in `preview` mode to verify Vercel linkage.
 7. Run the `deploy-services` workflow manually for `staging` to verify Railway deploy hooks.
-8. After verification, allow protected `main` to drive production deploys.
+8. Keep provider-native Git deployment enabled so normal pushes do not depend on GitHub fallback workflows.
 
 ## Required User Actions
 

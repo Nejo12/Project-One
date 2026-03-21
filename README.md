@@ -20,6 +20,13 @@ The project is no longer in scaffold mode. These slices are already implemented:
 - server preview rendering
 - moments rule creation and draft materialization baseline
 
+Deployments are currently owned by the providers:
+
+- Vercel native Git deployment for `web`
+- Railway native Git deployment for `api` and `worker`
+
+GitHub deploy workflows are kept as manual fallback workflows, not as the default deployment path.
+
 The project is not feature-complete yet. The missing business-critical path is:
 
 1. draft review and approval

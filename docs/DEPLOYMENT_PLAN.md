@@ -2,7 +2,7 @@
 
 This document defines the recommended deployment baseline for the current monorepo.
 
-The repository now includes baseline deployment workflows for the documented targets. See [`CD_SETUP.md`](./CD_SETUP.md) for the exact GitHub Actions files, required secrets, and provider-side setup checklist.
+The repository includes baseline fallback deployment workflows for the documented targets. See [`CD_SETUP.md`](./CD_SETUP.md) for the exact GitHub Actions files, required secrets, and provider-side setup checklist.
 
 ## Recommended Baseline
 
@@ -26,6 +26,7 @@ The repository now includes baseline deployment workflows for the documented tar
 
 - Deploy from `main` to production.
 - Use preview deployments for pull requests.
+- Let Vercel native Git deployment own those normal deploys.
 - Set `NEXT_PUBLIC_API_URL` per environment.
 
 ### API
@@ -33,6 +34,7 @@ The repository now includes baseline deployment workflows for the documented tar
 - Deploy as a long-running service.
 - Expose a stable base URL for the web app and external webhooks.
 - Attach Postgres, Redis, and object storage credentials through provider secrets.
+- Let Railway native Git deployment own normal deploys.
 
 ### Worker
 
@@ -41,6 +43,7 @@ The repository now includes baseline deployment workflows for the documented tar
 - Do not couple worker rollout to web deploys.
 - Build from the monorepo root with `npm -w worker run build`.
 - Start the production worker with `npm -w worker run start`.
+- Let Railway native Git deployment own normal deploys.
 
 ## Environment Mapping
 
@@ -57,9 +60,9 @@ The repository now includes baseline deployment workflows for the documented tar
 When deployment automation is added, use this order:
 
 1. Build and verify on every pull request.
-2. Deploy preview web builds automatically on pull requests.
-3. Deploy staging from a controlled branch or manual workflow.
-4. Deploy production from `main` after protected checks pass.
+2. Let Vercel and Railway deploy from Git pushes using their native Git integrations.
+3. Use GitHub Actions deploy workflows only as manual fallback workflows.
+4. Deploy staging from a controlled manual workflow when staging is introduced.
 5. Deploy worker independently from web when needed, but using the same tagged release or commit SHA.
 
 ## Secrets Ownership
@@ -116,5 +119,6 @@ The repository now contains the baseline CD workflows, but these external action
 3. Provision managed Postgres, Redis, and object storage for non-local environments.
 4. Add the runtime secrets to the selected hosting platforms.
 5. Decide whether preview deployments should share a staging API or use a separate preview API strategy.
+6. Keep provider-native Git deployments enabled unless you intentionally move deployment ownership back into GitHub Actions.
 
 Those decisions are prerequisites for the CD setup step, but not for the current repository documentation step.
