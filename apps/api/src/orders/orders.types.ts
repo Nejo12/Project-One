@@ -1,5 +1,4 @@
 import {
-  Order,
   PrintableAssetStatus,
   RenderPhotoFit,
   TemplateOrientation,
@@ -7,51 +6,69 @@ import {
   ShippingZone,
 } from '@prisma/client';
 
-export type OrderRecord = Pick<
-  Order,
-  | 'userId'
-  | 'id'
-  | 'draftId'
-  | 'contactId'
-  | 'contactFirstName'
-  | 'contactLastName'
-  | 'templateId'
-  | 'templateSlug'
-  | 'templateName'
-  | 'templateWidthMm'
-  | 'templateHeightMm'
-  | 'templateOrientation'
-  | 'templatePreviewLabel'
-  | 'templateAccentHex'
-  | 'templateSurfaceHex'
-  | 'templateTextHex'
-  | 'renderPreviewId'
-  | 'artifactObjectId'
-  | 'printableAssetObjectId'
-  | 'printableAssetStatus'
-  | 'printableAssetGeneratedAt'
-  | 'printableAssetError'
-  | 'photoObjectId'
-  | 'status'
-  | 'shippingType'
-  | 'shippingZone'
-  | 'currency'
-  | 'subtotalCents'
-  | 'taxCents'
-  | 'totalCents'
-  | 'stripeCheckoutSessionId'
-  | 'stripePaymentIntentId'
-  | 'paidAt'
-  | 'lastPaymentError'
-  | 'headline'
-  | 'message'
-  | 'fieldValues'
-  | 'photoFit'
-  | 'scheduledFor'
-  | 'occurrenceDate'
-  | 'createdAt'
-  | 'updatedAt'
->;
+export type FulfillmentSubmissionStatusValue =
+  | 'PENDING'
+  | 'PROCESSING'
+  | 'SUBMITTED'
+  | 'FAILED';
+
+export interface OrderRecord {
+  userId: string;
+  id: string;
+  draftId: string;
+  contactId: string;
+  contactFirstName: string;
+  contactLastName: string;
+  templateId: string;
+  templateSlug: string;
+  templateName: string;
+  templateWidthMm: number;
+  templateHeightMm: number;
+  templateOrientation: TemplateOrientation;
+  templatePreviewLabel: string;
+  templateAccentHex: string;
+  templateSurfaceHex: string;
+  templateTextHex: string;
+  renderPreviewId: string;
+  artifactObjectId: string;
+  printableAssetObjectId: string | null;
+  printableAssetStatus: PrintableAssetStatus;
+  printableAssetGeneratedAt: Date | null;
+  printableAssetError: string | null;
+  fulfillmentSubmissionStatus: FulfillmentSubmissionStatusValue;
+  fulfillmentAttemptCount: number;
+  fulfillmentSubmittedAt: Date | null;
+  providerName: string | null;
+  providerOrderReference: string | null;
+  providerAssetReference: string | null;
+  lastFulfillmentError: string | null;
+  photoObjectId: string | null;
+  status:
+    | 'AWAITING_PAYMENT'
+    | 'PAYMENT_FAILED'
+    | 'PAID'
+    | 'FULFILLMENT_PENDING'
+    | 'FULFILLED'
+    | 'CANCELLED';
+  shippingType: ShippingType | null;
+  shippingZone: ShippingZone | null;
+  currency: string | null;
+  subtotalCents: number | null;
+  taxCents: number | null;
+  totalCents: number | null;
+  stripeCheckoutSessionId: string | null;
+  stripePaymentIntentId: string | null;
+  paidAt: Date | null;
+  lastPaymentError: string | null;
+  headline: string;
+  message: string;
+  fieldValues: unknown;
+  photoFit: RenderPhotoFit | null;
+  scheduledFor: Date;
+  occurrenceDate: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 export interface DraftOrderConversionRecord {
   id: string;
@@ -114,6 +131,13 @@ export interface CreateOrderParams {
   printableAssetStatus?: PrintableAssetStatus;
   printableAssetGeneratedAt?: Date | null;
   printableAssetError?: string | null;
+  fulfillmentSubmissionStatus?: FulfillmentSubmissionStatusValue;
+  fulfillmentAttemptCount?: number;
+  fulfillmentSubmittedAt?: Date | null;
+  providerName?: string | null;
+  providerOrderReference?: string | null;
+  providerAssetReference?: string | null;
+  lastFulfillmentError?: string | null;
   photoObjectId: string | null;
   status: 'AWAITING_PAYMENT';
   shippingType?: ShippingType | null;

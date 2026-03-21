@@ -10,6 +10,7 @@ export type OrderStatusValue =
   | "CANCELLED";
 
 export type PrintableAssetStatusValue = "PENDING" | "PROCESSING" | "READY" | "FAILED";
+export type FulfillmentSubmissionStatusValue = "PENDING" | "PROCESSING" | "SUBMITTED" | "FAILED";
 
 export interface OrderView {
   id: string;
@@ -33,6 +34,13 @@ export interface OrderView {
   printableAssetStatus: PrintableAssetStatusValue;
   printableAssetGeneratedAt: string | null;
   printableAssetError: string | null;
+  fulfillmentSubmissionStatus: FulfillmentSubmissionStatusValue;
+  fulfillmentAttemptCount: number;
+  fulfillmentSubmittedAt: string | null;
+  providerName: string | null;
+  providerOrderReference: string | null;
+  providerAssetReference: string | null;
+  lastFulfillmentError: string | null;
   photoObjectId: string | null;
   status: OrderStatusValue;
   shippingType: ShippingTypeValue | null;

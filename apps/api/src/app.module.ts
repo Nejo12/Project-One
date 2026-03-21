@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { ContactsModule } from './contacts/contacts.module';
 import { DatabaseModule } from './database/database.module';
+import { FulfillmentModule } from './fulfillment/fulfillment.module';
 import { MomentsModule } from './moments/moments.module';
 import { OrdersModule } from './orders/orders.module';
 import { PaymentsModule } from './payments/payments.module';
@@ -21,6 +22,7 @@ import { TemplatesModule } from './templates/templates.module';
     SenderProfileModule,
     ContactsModule,
     AddressesModule,
+    FulfillmentModule,
     MomentsModule,
     OrdersModule,
     PaymentsModule,

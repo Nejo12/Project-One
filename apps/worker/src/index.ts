@@ -15,6 +15,12 @@ type ClaimPrintableAssetsResponse = {
   jobs: PrintableAssetJob[];
 };
 
+type FulfillmentSubmissionResponse = {
+  claimedOrders: number;
+  submittedOrders: number;
+  failedOrders: number;
+};
+
 type PrintableAssetJob = {
   orderId: string;
   assetObjectId: string;
@@ -259,6 +265,27 @@ async function triggerPrintableAssetGeneration(): Promise<void> {
   }
 }
 
+async function triggerPaidOrderSubmission(): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/internal/fulfillment/submit-paid-orders`, {
+    method: "POST",
+    headers: {
+      "x-internal-worker-token": INTERNAL_WORKER_TOKEN,
+    },
+  });
+
+  if (!response.ok) {
+    const responseBody = await response.text();
+    throw new Error(`Fulfillment submission request failed (${response.status}): ${responseBody}`);
+  }
+
+  const payload = (await response.json()) as FulfillmentSubmissionResponse;
+  if (payload.claimedOrders > 0 || payload.submittedOrders > 0 || payload.failedOrders > 0) {
+    console.log(
+      `worker: fulfillment batch claimed=${payload.claimedOrders} submitted=${payload.submittedOrders} failed=${payload.failedOrders}`,
+    );
+  }
+}
+
 async function startWorker(): Promise<void> {
   console.log(`worker: listening on Redis (${REDIS_URL}) for queue "${queueName}"`);
   console.log(`worker: target bucket "${S3_BUCKET}" via ${S3_ENDPOINT}`);
@@ -284,6 +311,7 @@ async function startWorker(): Promise<void> {
 
   await triggerDraftMaterialization();
   await triggerPrintableAssetGeneration();
+  await triggerPaidOrderSubmission();
   draftSchedulerInterval = setInterval(() => {
     void triggerDraftMaterialization().catch((error: unknown) => {
       if (error instanceof Error) {
@@ -297,6 +325,13 @@ async function startWorker(): Promise<void> {
         console.error(`worker: printable asset scheduler failed: ${error.message}`);
       } else {
         console.error("worker: printable asset scheduler failed", error);
+      }
+    });
+    void triggerPaidOrderSubmission().catch((error: unknown) => {
+      if (error instanceof Error) {
+        console.error(`worker: fulfillment scheduler failed: ${error.message}`);
+      } else {
+        console.error("worker: fulfillment scheduler failed", error);
       }
     });
   }, DRAFT_SCHEDULER_INTERVAL_MS);

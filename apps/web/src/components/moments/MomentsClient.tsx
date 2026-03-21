@@ -763,9 +763,25 @@ export function MomentsClient() {
                             ? ` at ${formatDateTime(relatedOrder.printableAssetGeneratedAt)}`
                             : ""}
                         </p>
+                        <p className="text-sm leading-7 text-foreground/68">
+                          Fulfillment submission · {relatedOrder.fulfillmentSubmissionStatus}
+                          {relatedOrder.fulfillmentSubmittedAt
+                            ? ` at ${formatDateTime(relatedOrder.fulfillmentSubmittedAt)}`
+                            : ""}
+                        </p>
+                        {relatedOrder.providerOrderReference ? (
+                          <p className="text-sm leading-7 text-foreground/68">
+                            Provider reference · {relatedOrder.providerOrderReference}
+                          </p>
+                        ) : null}
                         {relatedOrder.printableAssetError ? (
                           <p className="text-sm leading-7 text-red-700">
                             Printable asset error: {relatedOrder.printableAssetError}
+                          </p>
+                        ) : null}
+                        {relatedOrder.lastFulfillmentError ? (
+                          <p className="text-sm leading-7 text-red-700">
+                            Fulfillment error: {relatedOrder.lastFulfillmentError}
                           </p>
                         ) : null}
 

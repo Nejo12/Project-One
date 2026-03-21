@@ -108,6 +108,13 @@ enum PrintableAssetStatus {
   FAILED
 }
 
+enum FulfillmentSubmissionStatus {
+  PENDING
+  PROCESSING
+  SUBMITTED
+  FAILED
+}
+
 model User {
   id                  String                   @id @default(cuid())
   email               String                   @unique
@@ -122,6 +129,7 @@ model User {
   drafts              Draft[]
   momentRules         MomentRule[]
   orders              Order[]
+  providerLogs        FulfillmentProviderLog[]
   paymentEvents       PaymentWebhookEvent[]
   profile             SenderProfile?
   renderPreviews      RenderPreview[]
@@ -162,6 +170,7 @@ model Contact {
   addressLinks    ContactAddress[]
   drafts          Draft[]
   momentRules     MomentRule[]
+  orders          Order[]
   user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, lastName, firstName])
@@ -380,6 +389,13 @@ model Order {
   printableAssetStatus   PrintableAssetStatus @default(PENDING)
   printableAssetGeneratedAt DateTime?
   printableAssetError String?
+  fulfillmentSubmissionStatus FulfillmentSubmissionStatus @default(PENDING)
+  fulfillmentAttemptCount Int @default(0)
+  fulfillmentSubmittedAt DateTime?
+  providerName      String?
+  providerOrderReference String? @unique
+  providerAssetReference String?
+  lastFulfillmentError String?
   photoObjectId     String?
   status            OrderStatus    @default(AWAITING_PAYMENT)
   shippingType      ShippingType?
@@ -402,12 +418,31 @@ model Order {
   updatedAt         DateTime       @updatedAt
   artifactObject    StoredObject   @relation("OrderArtifact", fields: [artifactObjectId], references: [id], onDelete: Restrict)
   printableAssetObject StoredObject? @relation("OrderPrintableAsset", fields: [printableAssetObjectId], references: [id], onDelete: SetNull)
+  providerLogs      FulfillmentProviderLog[]
+  contact           Contact        @relation(fields: [contactId], references: [id], onDelete: Restrict)
   photoObject       StoredObject?  @relation("OrderPhoto", fields: [photoObjectId], references: [id], onDelete: SetNull)
   user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, status, createdAt])
   @@index([artifactObjectId])
   @@index([userId, printableAssetStatus, createdAt])
+  @@index([userId, fulfillmentSubmissionStatus, createdAt])
+}
+
+model FulfillmentProviderLog {
+  id              String   @id @default(cuid())
+  orderId         String
+  userId          String
+  providerName    String
+  requestPayload  Json
+  responsePayload Json
+  succeeded       Boolean
+  createdAt       DateTime @default(now())
+  order           Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([orderId, createdAt])
+  @@index([providerName, createdAt])
 }
 
 model PaymentWebhookEvent {

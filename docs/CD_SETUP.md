@@ -100,15 +100,18 @@ For each Railway service:
      - build: `npm -w worker run build`
      - start: `npm -w worker run start`
 5. align shared runtime variables:
-   - `api`
-     - `APP_BASE_URL`
-     - `INTERNAL_WORKER_TOKEN`
-     - `STRIPE_SECRET_KEY`
-     - `STRIPE_WEBHOOK_SECRET`
-   - `worker`
-     - `API_BASE_URL`
-     - `INTERNAL_WORKER_TOKEN`
-     - `DRAFT_SCHEDULER_INTERVAL_MS`
+
+- `api`
+  - `APP_BASE_URL`
+  - `INTERNAL_WORKER_TOKEN`
+  - `STRIPE_SECRET_KEY`
+  - `STRIPE_WEBHOOK_SECRET`
+  - `PRINT_PROVIDER_MODE`
+- `worker`
+  - `API_BASE_URL`
+  - `INTERNAL_WORKER_TOKEN`
+  - `DRAFT_SCHEDULER_INTERVAL_MS`
+
 6. generate a deploy hook URL if you want to use the manual fallback workflows
 7. store that deploy hook URL in the matching GitHub secret
 

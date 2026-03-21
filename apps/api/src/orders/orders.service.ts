@@ -201,6 +201,10 @@ export class OrdersService {
       order.printableAssetGeneratedAt instanceof Date
         ? order.printableAssetGeneratedAt.toISOString()
         : null;
+    const fulfillmentSubmittedAt =
+      order.fulfillmentSubmittedAt instanceof Date
+        ? order.fulfillmentSubmittedAt.toISOString()
+        : null;
 
     return {
       id: order.id,
@@ -224,6 +228,13 @@ export class OrdersService {
       printableAssetStatus: order.printableAssetStatus,
       printableAssetGeneratedAt,
       printableAssetError: order.printableAssetError,
+      fulfillmentSubmissionStatus: order.fulfillmentSubmissionStatus,
+      fulfillmentAttemptCount: order.fulfillmentAttemptCount,
+      fulfillmentSubmittedAt,
+      providerName: order.providerName,
+      providerOrderReference: order.providerOrderReference,
+      providerAssetReference: order.providerAssetReference,
+      lastFulfillmentError: order.lastFulfillmentError,
       photoObjectId: order.photoObjectId,
       status: order.status,
       shippingType: order.shippingType,

@@ -13,6 +13,7 @@ Behavior:
 - each order carries:
   - the original preview artifact reference used during approval
   - a separate printable asset lifecycle for the order-safe PDF
+- paid orders then move through a separate fulfillment submission lifecycle
 - printable asset generation is handled asynchronously by the worker
 - checkout should only proceed once `printableAssetStatus` is `READY`
 
