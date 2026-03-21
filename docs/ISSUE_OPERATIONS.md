@@ -33,19 +33,14 @@ This keeps the tracker useful without flooding the repository with low-signal is
 
 ## Focused Execution Order
 
-The current MVP-critical order is:
+The current launch-critical order is:
 
-1. `chore(ops): fix production CORS and deployment workflow reliability`
-2. `US-4.2: move draft generation to background scheduling`
-3. `US-4.3: manage drafts with approve, edit, skip, and snooze`
-4. `US-6.0: add order domain and draft-to-order conversion`
-5. `US-6.1: implement pricing engine`
-6. `US-6.2: integrate Stripe checkout and webhooks`
-7. `US-3.3 follow-up: generate immutable printable assets for orders`
-8. `US-7.1: submit paid orders to print provider with asset upload`
-9. `US-7.2: sync fulfillment status from provider`
-10. `US-1.1 follow-up: add provider-backed email verification delivery`
-11. `EPIC-5 / US-5.1: lifecycle email notifications`
+1. `EPIC: Launch Mail a Moment on the production domain`
+2. `US: cut over mailamoment.com across Vercel, Railway, and Resend`
+3. `US: align public-facing brand copy, metadata, and email subjects`
+4. `US: ship launch-ready logo, icon, and favicon assets`
+5. `US: run end-to-end production readiness validation`
+6. `chore: optionally rename repo/package slugs after the public cutover is stable`
 
 Anything outside that path should be treated as deferred unless it blocks delivery.
 
@@ -110,3 +105,4 @@ Before applying the seed:
 - Keep at most one active product issue and one active ops issue at a time.
 - Every implementation issue must include acceptance criteria, explicit out-of-scope notes, and verification commands.
 - If an issue becomes larger than one focused delivery slice, split it before implementation drifts.
+- Close completed feature-delivery issues quickly once the code is merged and verified so the tracker reflects the actual remaining launch work.

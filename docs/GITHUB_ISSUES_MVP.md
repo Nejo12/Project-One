@@ -6,22 +6,24 @@ This document is the planning source of truth, but not every item below belongs 
 
 As of the current delivery state:
 
-- auth, sender readiness, contacts, addresses, template catalog, editor, storage, rendering preview, and moment-rule creation are already implemented
-- draft review and approval are not implemented
-- pricing, checkout, orders, fulfillment, and lifecycle notifications are not implemented
-- print-ready PDF generation is not complete; the current rendering boundary is still preview-oriented
+- the core MVP path is implemented in code:
+  - verified auth and sender readiness
+  - contacts, addresses, and contact-address linking
+  - template catalog, editor, storage-backed uploads, preview rendering, and immutable printable assets
+  - background scheduling plus draft review, approve, skip, snooze, and re-edit actions
+  - order conversion, pricing, Stripe checkout, webhook handling, fulfillment submission, and fulfillment sync
+  - provider-backed auth email delivery and lifecycle emails
+- the current highest-value work is launch hardening, not another major product subsystem
+- `mailamoment.com` is the intended brand/domain cutover, but the fallback Vercel domain is still the currently reachable live origin
+- the repository slug is still `redeemption`; treat repo renaming as deliberate follow-up work, not an incidental side effect
 
-Use the live tracker to focus only on the next MVP-critical path:
+Use the live tracker to focus only on the next launch-critical path:
 
-1. fix production deployment truth and CORS drift
-2. move draft generation to background scheduling
-3. add draft review, approve, skip, snooze, and re-edit flow
-4. add an order domain and draft-to-order conversion
-5. implement pricing
-6. integrate Stripe checkout and webhooks
-7. generate immutable printable assets for orders
-8. submit paid orders to a print provider and track status
-9. add lifecycle email delivery
+1. cut over `mailamoment.com` across Vercel, Railway, and Resend
+2. align public-facing brand copy, metadata, and email subjects to Mail a Moment
+3. ship launch-ready logo, icon, and favicon assets
+4. run end-to-end production readiness validation and fix blockers
+5. optionally rename internal repo/package slugs after the public cutover is stable
 
 Explicitly defer these unless they block MVP delivery:
 
@@ -38,6 +40,7 @@ Explicitly defer these unless they block MVP delivery:
 - `epic`
 - `backend`
 - `frontend`
+- `branding`
 - `infra`
 - `payments`
 - `fulfillment`
@@ -57,6 +60,8 @@ Explicitly defer these unless they block MVP delivery:
 - Milestone `phase-5`: Payments + order creation
 - Milestone `phase-6`: Fulfillment integration + tracking
 - Milestone `phase-7`: Hardening + GDPR + monitoring
+
+Current launch-hardening and Mail a Moment brand cutover work should live under `phase-7` unless a dedicated launch milestone is created later.
 
 ---
 

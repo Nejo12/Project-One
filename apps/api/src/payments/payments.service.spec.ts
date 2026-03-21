@@ -145,8 +145,7 @@ describe('PaymentsService', () => {
     paymentsRepository = new PaymentsRepositoryFake();
     pricingService = new PricingServiceFake();
     stripeClientService = new StripeClientServiceFake();
-    process.env.APP_BASE_URL =
-      'https://redeemption-olaniyis-projects.vercel.app';
+    process.env.APP_BASE_URL = 'https://mailamoment.com';
 
     service = new PaymentsService(
       pricingService as unknown as PricingService,

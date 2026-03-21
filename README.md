@@ -1,6 +1,6 @@
-# Redeemption
+# Mail a Moment
 
-Redeemption is a monorepo for an automated physical-mail product:
+Mail a Moment is a monorepo for an automated physical-mail product:
 
 - users manage contacts and addresses
 - users configure moments that should trigger a mailed card
@@ -10,15 +10,18 @@ Redeemption is a monorepo for an automated physical-mail product:
 
 ## Current State
 
-The project is no longer in scaffold mode. These slices are already implemented:
+The core MVP order pipeline now exists in code. These slices are already implemented:
 
 - repo governance, CI, deploy workflow scaffolding, and contributor standards
 - auth, password reset, and sender-profile readiness
 - contacts, addresses, and contact-address linking
 - template catalog, template editor, and one-photo upload
 - storage-backed upload metadata
-- server preview rendering
-- moments rule creation and draft materialization baseline
+- server preview rendering and immutable printable order assets
+- background scheduling for due drafts
+- draft review, approve, skip, snooze, and re-edit flows
+- order conversion, pricing, Stripe checkout, and webhook handling
+- fulfillment submission and provider status synchronization
 - provider-backed auth email delivery support via Resend-compatible API mode
 - lifecycle emails for draft-ready, payment-required, and shipped states
 
@@ -29,14 +32,21 @@ Deployments are currently owned by the providers:
 
 GitHub deploy workflows are kept as manual fallback workflows, not as the default deployment path.
 
-The project is not feature-complete yet. The missing business-critical path is:
+The product is now in launch-hardening mode rather than feature-foundation mode.
 
-1. draft review and approval
-2. background scheduling
-3. order domain
-4. pricing and checkout
-5. fulfillment
-6. broader lifecycle communication beyond the current baseline
+Current live truth:
+
+- the production web is still reachable on the Vercel fallback domain
+- `mailamoment.com` is the intended public brand and canonical domain
+- the GitHub repository slug is still `redeemption` until a deliberate repo rename happens
+
+The remaining business-critical work is:
+
+1. cut over `mailamoment.com` cleanly across Vercel, Railway, and Resend
+2. align public-facing brand copy, sender identity, and app metadata to Mail a Moment
+3. ship a clean logo/icon/favicon system for launch surfaces
+4. run end-to-end production validation and fix launch blockers
+5. optionally clean up internal slug drift after the public cutover is stable
 
 ## Source Of Truth
 
@@ -51,17 +61,13 @@ The live GitHub tracker must match the focused execution plan in those documents
 
 ## Focused MVP Path
 
-The blunt MVP path from here is:
+The blunt launch path from here is:
 
-1. fix deployment truth and production configuration drift
-2. move draft generation to background scheduling
-3. add draft review, approve, skip, snooze, and re-edit flow
-4. add an order domain and draft-to-order conversion
-5. implement pricing
-6. integrate checkout and payment webhooks
-7. generate immutable printable assets for orders
-8. submit paid orders to the print provider and track status
-9. extend lifecycle communication where the product needs it
+1. cut over `mailamoment.com` across the product stack
+2. align public-facing brand copy, metadata, and email subjects to Mail a Moment
+3. ship launch-ready logo, icon, and favicon assets
+4. run end-to-end production readiness checks and fix any blockers
+5. decide whether to rename the repository slug after launch stabilization
 
 Explicitly deferred from the critical path:
 

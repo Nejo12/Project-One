@@ -16,7 +16,7 @@ export class AuthEmailService {
 
     return this.emailDeliveryService.sendTransactionalEmail({
       to: params.email,
-      subject: 'Verify your Redeemption account',
+      subject: 'Verify your Mail a Moment account',
       text: [
         `Hi ${greeting},`,
         '',
@@ -46,7 +46,7 @@ export class AuthEmailService {
 
     return this.emailDeliveryService.sendTransactionalEmail({
       to: params.email,
-      subject: 'Reset your Redeemption password',
+      subject: 'Reset your Mail a Moment password',
       text: [
         `Hi ${greeting},`,
         '',

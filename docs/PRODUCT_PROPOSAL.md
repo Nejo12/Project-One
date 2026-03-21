@@ -2,16 +2,14 @@
 
 ## Current Delivery Note
 
-The proposal still describes the intended MVP, but implementation should now stay tightly focused on the shortest path to a real paid and fulfilled order flow.
+The proposal still describes the intended MVP, but the core paid-and-fulfilled order flow is now implemented in code. The near-term priority is launch hardening around the new public brand and domain:
 
-That means the near-term priority is:
+1. cut over `mailamoment.com` across Vercel, Railway, and Resend
+2. align public-facing copy, metadata, and sender identity to Mail a Moment
+3. ship a launch-ready icon/logo/favicon system
+4. run end-to-end production validation and fix blockers
 
-1. draft review and approval
-2. background scheduling
-3. orders
-4. pricing and checkout
-5. fulfillment
-6. lifecycle notifications
+The repository slug and some internal identifiers still say `redeemption`. Treat that as cleanup after the public cutover, not as the main launch blocker.
 
 These items are explicitly secondary until the order pipeline is real:
 
@@ -21,6 +19,24 @@ These items are explicitly secondary until the order pipeline is real:
 - subscriptions
 - AI suggestions
 - broader compliance tooling beyond MVP placeholders
+
+## Brand Direction
+
+The working public brand is now **Mail a Moment**.
+
+Why this is better than the previous placeholder:
+
+- easier to spell and say out loud
+- directly communicates the product promise
+- stronger trust and word-of-mouth clarity for a gifting and mail product
+- avoids the typo/confusion risk in `Redeemption`
+
+Near-term brand work should stay pragmatic:
+
+- update public-facing copy first
+- connect the new domain next
+- ship a clean icon/logo/favicon set
+- defer internal slug cleanup until the launch path is stable
 
 ### One-line
 

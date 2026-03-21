@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Project One",
-  description: "Moments to Mail design system and product foundation",
+  title: "Mail a Moment",
+  description: "Thoughtful mail for the moments that matter.",
 };
 
 export default function RootLayout({
