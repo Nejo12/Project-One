@@ -1,6 +1,6 @@
 # Fulfillment API Contract
 
-This slice introduces the first paid-order submission boundary to a print-provider adapter.
+This slice covers paid-order provider submission plus provider-status polling.
 
 Current behavior:
 
@@ -13,6 +13,12 @@ Current behavior:
   - `fulfillmentSubmissionStatus = FAILED`
   - `lastFulfillmentError = ...`
 - provider request/response logs are persisted in redacted form
+- submitted orders are polled by the worker through an internal sync endpoint
+- provider status updates map to internal order lifecycle:
+  - `QUEUED` or `IN_PRODUCTION` -> `FULFILLMENT_PENDING`
+  - `SHIPPED` -> `FULFILLMENT_PENDING` with tracking data
+  - `DELIVERED` -> `FULFILLED`
+  - `FAILED` -> `FULFILLMENT_FAILED`
 
 Current provider mode:
 
@@ -27,12 +33,17 @@ Stored order fields now include:
 - `providerName`
 - `providerOrderReference`
 - `providerAssetReference`
+- `providerFulfillmentStatus`
+- `fulfillmentStatusSyncedAt`
+- `shipmentTrackingNumber`
+- `shipmentTrackingUrl`
+- `deliveredAt`
 - `fulfillmentSubmittedAt`
 - `fulfillmentAttemptCount`
 - `lastFulfillmentError`
 
 Notes:
 
-- this slice stops at provider submission
-- provider webhook or polling status sync lands in the next fulfillment slice
+- this MVP uses polling rather than provider webhooks
+- the sandbox provider simulates a progression from queued -> in production -> shipped -> delivered
 - a real provider can replace the sandbox adapter without changing the worker-triggered API contract

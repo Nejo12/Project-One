@@ -769,9 +769,40 @@ export function MomentsClient() {
                             ? ` at ${formatDateTime(relatedOrder.fulfillmentSubmittedAt)}`
                             : ""}
                         </p>
+                        {relatedOrder.providerFulfillmentStatus ? (
+                          <p className="text-sm leading-7 text-foreground/68">
+                            Provider status · {relatedOrder.providerFulfillmentStatus}
+                            {relatedOrder.fulfillmentStatusSyncedAt
+                              ? ` at ${formatDateTime(relatedOrder.fulfillmentStatusSyncedAt)}`
+                              : ""}
+                          </p>
+                        ) : null}
                         {relatedOrder.providerOrderReference ? (
                           <p className="text-sm leading-7 text-foreground/68">
                             Provider reference · {relatedOrder.providerOrderReference}
+                          </p>
+                        ) : null}
+                        {relatedOrder.shipmentTrackingNumber ? (
+                          <p className="text-sm leading-7 text-foreground/68">
+                            Tracking number · {relatedOrder.shipmentTrackingNumber}
+                          </p>
+                        ) : null}
+                        {relatedOrder.shipmentTrackingUrl ? (
+                          <p className="text-sm leading-7 text-foreground/68">
+                            Tracking link ·{" "}
+                            <a
+                              className="text-accent underline underline-offset-4"
+                              href={relatedOrder.shipmentTrackingUrl}
+                              rel="noreferrer"
+                              target="_blank"
+                            >
+                              Open tracking
+                            </a>
+                          </p>
+                        ) : null}
+                        {relatedOrder.deliveredAt ? (
+                          <p className="text-sm leading-7 text-foreground/68">
+                            Delivered at {formatDateTime(relatedOrder.deliveredAt)}
                           </p>
                         ) : null}
                         {relatedOrder.printableAssetError ? (

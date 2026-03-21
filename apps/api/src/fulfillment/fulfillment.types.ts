@@ -6,6 +6,13 @@ export type FulfillmentSubmissionStatusValue =
   | 'SUBMITTED'
   | 'FAILED';
 
+export type ProviderFulfillmentStatusValue =
+  | 'QUEUED'
+  | 'IN_PRODUCTION'
+  | 'SHIPPED'
+  | 'DELIVERED'
+  | 'FAILED';
+
 export interface FulfillmentCandidateRecord {
   id: string;
   userId: string;
@@ -55,6 +62,19 @@ export interface FulfillmentCandidateRecord {
   };
 }
 
+export interface FulfillmentSyncCandidateRecord {
+  id: string;
+  userId: string;
+  status: OrderStatus;
+  providerName: string | null;
+  providerOrderReference: string | null;
+  providerAssetReference: string | null;
+  fulfillmentSubmittedAt: Date | null;
+  providerFulfillmentStatus: ProviderFulfillmentStatusValue | null;
+  shipmentTrackingNumber: string | null;
+  shipmentTrackingUrl: string | null;
+}
+
 export interface FulfillmentSubmissionSuccess {
   providerName: string;
   providerOrderReference: string;
@@ -79,6 +99,33 @@ export type FulfillmentSubmissionResult =
   | {
       ok: false;
       failure: FulfillmentSubmissionFailure;
+    };
+
+export interface FulfillmentStatusSyncSuccess {
+  providerName: string;
+  providerFulfillmentStatus: ProviderFulfillmentStatusValue;
+  requestPayload: Prisma.InputJsonObject;
+  responsePayload: Prisma.InputJsonObject;
+  shipmentTrackingNumber: string | null;
+  shipmentTrackingUrl: string | null;
+}
+
+export type FulfillmentStatusSyncFailure = {
+  providerName: string;
+  requestPayload: Prisma.InputJsonObject;
+  responsePayload: Prisma.InputJsonObject;
+  errorMessage: string;
+  retryable: boolean;
+};
+
+export type FulfillmentStatusSyncResult =
+  | {
+      ok: true;
+      success: FulfillmentStatusSyncSuccess;
+    }
+  | {
+      ok: false;
+      failure: FulfillmentStatusSyncFailure;
     };
 
 export interface FulfillmentProviderLogRecord {

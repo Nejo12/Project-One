@@ -205,6 +205,14 @@ export class OrdersService {
       order.fulfillmentSubmittedAt instanceof Date
         ? order.fulfillmentSubmittedAt.toISOString()
         : null;
+    const fulfillmentStatusSyncedAt =
+      order.fulfillmentStatusSyncedAt instanceof Date
+        ? order.fulfillmentStatusSyncedAt.toISOString()
+        : null;
+    const deliveredAt =
+      order.deliveredAt instanceof Date
+        ? order.deliveredAt.toISOString()
+        : null;
 
     return {
       id: order.id,
@@ -231,9 +239,14 @@ export class OrdersService {
       fulfillmentSubmissionStatus: order.fulfillmentSubmissionStatus,
       fulfillmentAttemptCount: order.fulfillmentAttemptCount,
       fulfillmentSubmittedAt,
+      providerFulfillmentStatus: order.providerFulfillmentStatus,
+      fulfillmentStatusSyncedAt,
       providerName: order.providerName,
       providerOrderReference: order.providerOrderReference,
       providerAssetReference: order.providerAssetReference,
+      shipmentTrackingNumber: order.shipmentTrackingNumber,
+      shipmentTrackingUrl: order.shipmentTrackingUrl,
+      deliveredAt,
       lastFulfillmentError: order.lastFulfillmentError,
       photoObjectId: order.photoObjectId,
       status: order.status,

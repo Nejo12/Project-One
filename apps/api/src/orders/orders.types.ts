@@ -12,6 +12,13 @@ export type FulfillmentSubmissionStatusValue =
   | 'SUBMITTED'
   | 'FAILED';
 
+export type ProviderFulfillmentStatusValue =
+  | 'QUEUED'
+  | 'IN_PRODUCTION'
+  | 'SHIPPED'
+  | 'DELIVERED'
+  | 'FAILED';
+
 export interface OrderRecord {
   userId: string;
   id: string;
@@ -38,9 +45,14 @@ export interface OrderRecord {
   fulfillmentSubmissionStatus: FulfillmentSubmissionStatusValue;
   fulfillmentAttemptCount: number;
   fulfillmentSubmittedAt: Date | null;
+  providerFulfillmentStatus: ProviderFulfillmentStatusValue | null;
+  fulfillmentStatusSyncedAt: Date | null;
   providerName: string | null;
   providerOrderReference: string | null;
   providerAssetReference: string | null;
+  shipmentTrackingNumber: string | null;
+  shipmentTrackingUrl: string | null;
+  deliveredAt: Date | null;
   lastFulfillmentError: string | null;
   photoObjectId: string | null;
   status:
@@ -48,6 +60,7 @@ export interface OrderRecord {
     | 'PAYMENT_FAILED'
     | 'PAID'
     | 'FULFILLMENT_PENDING'
+    | 'FULFILLMENT_FAILED'
     | 'FULFILLED'
     | 'CANCELLED';
   shippingType: ShippingType | null;
@@ -134,9 +147,14 @@ export interface CreateOrderParams {
   fulfillmentSubmissionStatus?: FulfillmentSubmissionStatusValue;
   fulfillmentAttemptCount?: number;
   fulfillmentSubmittedAt?: Date | null;
+  providerFulfillmentStatus?: ProviderFulfillmentStatusValue | null;
+  fulfillmentStatusSyncedAt?: Date | null;
   providerName?: string | null;
   providerOrderReference?: string | null;
   providerAssetReference?: string | null;
+  shipmentTrackingNumber?: string | null;
+  shipmentTrackingUrl?: string | null;
+  deliveredAt?: Date | null;
   lastFulfillmentError?: string | null;
   photoObjectId: string | null;
   status: 'AWAITING_PAYMENT';

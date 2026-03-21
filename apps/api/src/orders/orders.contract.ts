@@ -9,6 +9,7 @@ export type OrderStatusValue =
   | 'PAYMENT_FAILED'
   | 'PAID'
   | 'FULFILLMENT_PENDING'
+  | 'FULFILLMENT_FAILED'
   | 'FULFILLED'
   | 'CANCELLED';
 
@@ -22,6 +23,13 @@ export type FulfillmentSubmissionStatusValue =
   | 'PENDING'
   | 'PROCESSING'
   | 'SUBMITTED'
+  | 'FAILED';
+
+export type ProviderFulfillmentStatusValue =
+  | 'QUEUED'
+  | 'IN_PRODUCTION'
+  | 'SHIPPED'
+  | 'DELIVERED'
   | 'FAILED';
 
 export interface OrderView {
@@ -49,9 +57,14 @@ export interface OrderView {
   fulfillmentSubmissionStatus: FulfillmentSubmissionStatusValue;
   fulfillmentAttemptCount: number;
   fulfillmentSubmittedAt: string | null;
+  providerFulfillmentStatus: ProviderFulfillmentStatusValue | null;
+  fulfillmentStatusSyncedAt: string | null;
   providerName: string | null;
   providerOrderReference: string | null;
   providerAssetReference: string | null;
+  shipmentTrackingNumber: string | null;
+  shipmentTrackingUrl: string | null;
+  deliveredAt: string | null;
   lastFulfillmentError: string | null;
   photoObjectId: string | null;
   status: OrderStatusValue;

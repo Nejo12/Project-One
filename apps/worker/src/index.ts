@@ -21,6 +21,13 @@ type FulfillmentSubmissionResponse = {
   failedOrders: number;
 };
 
+type FulfillmentStatusSyncResponse = {
+  checkedOrders: number;
+  updatedOrders: number;
+  fulfilledOrders: number;
+  failedOrders: number;
+};
+
 type PrintableAssetJob = {
   orderId: string;
   assetObjectId: string;
@@ -286,6 +293,27 @@ async function triggerPaidOrderSubmission(): Promise<void> {
   }
 }
 
+async function triggerFulfillmentStatusSync(): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/internal/fulfillment/sync-submitted-orders`, {
+    method: "POST",
+    headers: {
+      "x-internal-worker-token": INTERNAL_WORKER_TOKEN,
+    },
+  });
+
+  if (!response.ok) {
+    const responseBody = await response.text();
+    throw new Error(`Fulfillment status sync failed (${response.status}): ${responseBody}`);
+  }
+
+  const payload = (await response.json()) as FulfillmentStatusSyncResponse;
+  if (payload.checkedOrders > 0 || payload.updatedOrders > 0 || payload.fulfilledOrders > 0) {
+    console.log(
+      `worker: fulfillment sync checked=${payload.checkedOrders} updated=${payload.updatedOrders} fulfilled=${payload.fulfilledOrders} failed=${payload.failedOrders}`,
+    );
+  }
+}
+
 async function startWorker(): Promise<void> {
   console.log(`worker: listening on Redis (${REDIS_URL}) for queue "${queueName}"`);
   console.log(`worker: target bucket "${S3_BUCKET}" via ${S3_ENDPOINT}`);
@@ -312,6 +340,7 @@ async function startWorker(): Promise<void> {
   await triggerDraftMaterialization();
   await triggerPrintableAssetGeneration();
   await triggerPaidOrderSubmission();
+  await triggerFulfillmentStatusSync();
   draftSchedulerInterval = setInterval(() => {
     void triggerDraftMaterialization().catch((error: unknown) => {
       if (error instanceof Error) {
@@ -332,6 +361,13 @@ async function startWorker(): Promise<void> {
         console.error(`worker: fulfillment scheduler failed: ${error.message}`);
       } else {
         console.error("worker: fulfillment scheduler failed", error);
+      }
+    });
+    void triggerFulfillmentStatusSync().catch((error: unknown) => {
+      if (error instanceof Error) {
+        console.error(`worker: fulfillment sync failed: ${error.message}`);
+      } else {
+        console.error("worker: fulfillment sync failed", error);
       }
     });
   }, DRAFT_SCHEDULER_INTERVAL_MS);

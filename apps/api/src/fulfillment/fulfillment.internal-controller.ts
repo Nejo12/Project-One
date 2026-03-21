@@ -6,7 +6,10 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { timingSafeEqual } from 'crypto';
-import type { FulfillmentSubmissionResponse } from './fulfillment.contract';
+import type {
+  FulfillmentStatusSyncResponse,
+  FulfillmentSubmissionResponse,
+} from './fulfillment.contract';
 import { FulfillmentService } from './fulfillment.service';
 
 @Controller('internal/fulfillment')
@@ -19,6 +22,14 @@ export class FulfillmentInternalController {
   ): Promise<FulfillmentSubmissionResponse> {
     this.assertInternalWorkerToken(receivedToken);
     return this.fulfillmentService.submitPaidOrders();
+  }
+
+  @Post('sync-submitted-orders')
+  syncSubmittedOrders(
+    @Headers('x-internal-worker-token') receivedToken: string | undefined,
+  ): Promise<FulfillmentStatusSyncResponse> {
+    this.assertInternalWorkerToken(receivedToken);
+    return this.fulfillmentService.syncSubmittedOrders();
   }
 
   private assertInternalWorkerToken(receivedToken: string | undefined): void {

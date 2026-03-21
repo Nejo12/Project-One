@@ -87,6 +87,7 @@ enum OrderStatus {
   PAYMENT_FAILED
   PAID
   FULFILLMENT_PENDING
+  FULFILLMENT_FAILED
   FULFILLED
   CANCELLED
 }
@@ -112,6 +113,14 @@ enum FulfillmentSubmissionStatus {
   PENDING
   PROCESSING
   SUBMITTED
+  FAILED
+}
+
+enum ProviderFulfillmentStatus {
+  QUEUED
+  IN_PRODUCTION
+  SHIPPED
+  DELIVERED
   FAILED
 }
 
@@ -392,9 +401,14 @@ model Order {
   fulfillmentSubmissionStatus FulfillmentSubmissionStatus @default(PENDING)
   fulfillmentAttemptCount Int @default(0)
   fulfillmentSubmittedAt DateTime?
+  providerFulfillmentStatus ProviderFulfillmentStatus?
+  fulfillmentStatusSyncedAt DateTime?
   providerName      String?
   providerOrderReference String? @unique
   providerAssetReference String?
+  shipmentTrackingNumber String?
+  shipmentTrackingUrl String?
+  deliveredAt       DateTime?
   lastFulfillmentError String?
   photoObjectId     String?
   status            OrderStatus    @default(AWAITING_PAYMENT)
@@ -427,6 +441,7 @@ model Order {
   @@index([artifactObjectId])
   @@index([userId, printableAssetStatus, createdAt])
   @@index([userId, fulfillmentSubmissionStatus, createdAt])
+  @@index([userId, providerFulfillmentStatus, createdAt])
 }
 
 model FulfillmentProviderLog {

@@ -3,6 +3,9 @@ import { randomUUID } from 'crypto';
 import {
   FulfillmentCandidateRecord,
   FulfillmentSubmissionResult,
+  ProviderFulfillmentStatusValue,
+  FulfillmentStatusSyncResult,
+  FulfillmentSyncCandidateRecord,
 } from './fulfillment.types';
 
 type ProviderAddressSnapshot = {
@@ -101,6 +104,69 @@ export class PrintProviderService {
     });
   }
 
+  syncOrderStatus(
+    order: FulfillmentSyncCandidateRecord,
+  ): Promise<FulfillmentStatusSyncResult> {
+    const providerMode = process.env.PRINT_PROVIDER_MODE ?? 'sandbox';
+    if (providerMode !== 'sandbox') {
+      return Promise.resolve({
+        ok: false,
+        failure: {
+          providerName: providerMode,
+          requestPayload: {},
+          responsePayload: {},
+          errorMessage: `Unsupported print provider mode "${providerMode}".`,
+          retryable: false,
+        },
+      });
+    }
+
+    if (!order.providerOrderReference || !order.fulfillmentSubmittedAt) {
+      return Promise.resolve({
+        ok: false,
+        failure: {
+          providerName: order.providerName ?? 'sandbox-print-provider',
+          requestPayload: {},
+          responsePayload: {},
+          errorMessage:
+            'Submitted order is missing provider references required for fulfillment sync.',
+          retryable: false,
+        },
+      });
+    }
+
+    const elapsedMs = Date.now() - order.fulfillmentSubmittedAt.getTime();
+    const shipmentTrackingNumber =
+      elapsedMs >= 30_000 ? `sandbox_track_${order.id}` : null;
+    const shipmentTrackingUrl = shipmentTrackingNumber
+      ? `https://tracking.sandbox.print/${shipmentTrackingNumber}`
+      : null;
+    const providerFulfillmentStatus = this.resolveSandboxStatus(elapsedMs);
+    const requestPayload = {
+      orderId: order.id,
+      providerOrderReference: order.providerOrderReference,
+      providerAssetReference: order.providerAssetReference,
+    } satisfies Record<string, unknown>;
+    const responsePayload = {
+      providerOrderReference: order.providerOrderReference,
+      status: providerFulfillmentStatus,
+      shipmentTrackingNumber,
+      shipmentTrackingUrl,
+    } satisfies Record<string, unknown>;
+
+    return Promise.resolve({
+      ok: true,
+      success: {
+        providerName: order.providerName ?? 'sandbox-print-provider',
+        providerFulfillmentStatus,
+        requestPayload,
+        responsePayload,
+        shipmentTrackingNumber,
+        shipmentTrackingUrl,
+      },
+    });
+  }
+
   private buildRecipientAddress(
     order: FulfillmentCandidateRecord,
   ): ProviderAddressSnapshot | null {
@@ -155,5 +221,23 @@ export class PrintProviderService {
       postalCode: address.postalCode,
       countryCode: address.countryCode,
     };
+  }
+
+  private resolveSandboxStatus(
+    elapsedMs: number,
+  ): ProviderFulfillmentStatusValue {
+    if (elapsedMs < 15_000) {
+      return 'QUEUED';
+    }
+
+    if (elapsedMs < 30_000) {
+      return 'IN_PRODUCTION';
+    }
+
+    if (elapsedMs < 45_000) {
+      return 'SHIPPED';
+    }
+
+    return 'DELIVERED';
   }
 }
