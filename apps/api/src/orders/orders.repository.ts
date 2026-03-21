@@ -144,6 +144,17 @@ export class OrdersRepository {
             artifactObjectId: true,
           },
         },
+        user: {
+          select: {
+            email: true,
+            displayName: true,
+            profile: {
+              select: {
+                fullName: true,
+              },
+            },
+          },
+        },
       },
     }) as Promise<DraftOrderConversionRecord | null>;
   }

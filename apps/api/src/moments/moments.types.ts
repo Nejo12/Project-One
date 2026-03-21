@@ -120,11 +120,22 @@ export interface CreateDraftParams {
 export interface DraftDueRecord {
   id: string;
   userId: string;
+  occurrenceDate: Date;
   photoObjectId: string | null;
   photoFit: RenderPhotoFit | null;
   fieldValues: Record<string, string>;
   momentRuleId: string;
+  contact: {
+    firstName: string;
+  };
   template: MomentTemplateSummaryRecord;
+  user: {
+    email: string;
+    displayName: string | null;
+    profile: {
+      fullName: string | null;
+    } | null;
+  };
 }
 
 export interface DraftDecisionContext {

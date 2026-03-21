@@ -120,6 +120,13 @@ export interface DraftOrderConversionRecord {
   fieldValues: Record<string, string>;
   scheduledFor: Date;
   occurrenceDate: Date;
+  user: {
+    email: string;
+    displayName: string | null;
+    profile: {
+      fullName: string | null;
+    } | null;
+  };
 }
 
 export interface CreateOrderParams {

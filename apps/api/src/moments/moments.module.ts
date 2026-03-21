@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 import { RenderingModule } from '../rendering/rendering.module';
 import { StorageModule } from '../storage/storage.module';
 import { MomentsController } from './moments.controller';
@@ -8,7 +9,7 @@ import { MomentsRepository } from './moments.repository';
 import { MomentsService } from './moments.service';
 
 @Module({
-  imports: [AuthModule, StorageModule, RenderingModule],
+  imports: [AuthModule, NotificationsModule, StorageModule, RenderingModule],
   controllers: [MomentsController, MomentsInternalController],
   providers: [MomentsRepository, MomentsService],
 })

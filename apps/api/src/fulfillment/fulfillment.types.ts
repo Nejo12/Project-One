@@ -73,6 +73,14 @@ export interface FulfillmentSyncCandidateRecord {
   providerFulfillmentStatus: ProviderFulfillmentStatusValue | null;
   shipmentTrackingNumber: string | null;
   shipmentTrackingUrl: string | null;
+  contactFirstName: string;
+  user: {
+    email: string;
+    displayName: string | null;
+    profile: {
+      fullName: string | null;
+    } | null;
+  };
 }
 
 export interface FulfillmentSubmissionSuccess {

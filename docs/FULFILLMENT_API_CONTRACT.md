@@ -19,6 +19,7 @@ Current behavior:
   - `SHIPPED` -> `FULFILLMENT_PENDING` with tracking data
   - `DELIVERED` -> `FULFILLED`
   - `FAILED` -> `FULFILLMENT_FAILED`
+- the first `SHIPPED` state now also triggers a one-time lifecycle email with tracking data when available
 
 Current provider mode:
 

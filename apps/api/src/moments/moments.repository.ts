@@ -346,15 +346,32 @@ export class MomentsRepository {
       select: {
         id: true,
         userId: true,
+        occurrenceDate: true,
         photoObjectId: true,
         photoFit: true,
         fieldValues: true,
         momentRuleId: true,
+        contact: {
+          select: {
+            firstName: true,
+          },
+        },
         template: {
           select: {
             id: true,
             slug: true,
             name: true,
+          },
+        },
+        user: {
+          select: {
+            email: true,
+            displayName: true,
+            profile: {
+              select: {
+                fullName: true,
+              },
+            },
           },
         },
       },

@@ -33,6 +33,7 @@ Behavior:
 - a draft can be converted only once
 - the approved draft must already have a persisted render preview
 - the created order starts in `AWAITING_PAYMENT`
+- the created order now also triggers a one-time payment-required lifecycle email
 - the order stores immutable references and render metadata for:
   - `renderPreviewId`
   - `artifactObjectId`

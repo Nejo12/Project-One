@@ -20,6 +20,7 @@ The project is no longer in scaffold mode. These slices are already implemented:
 - server preview rendering
 - moments rule creation and draft materialization baseline
 - provider-backed auth email delivery support via Resend-compatible API mode
+- lifecycle emails for draft-ready, payment-required, and shipped states
 
 Deployments are currently owned by the providers:
 
@@ -35,7 +36,7 @@ The project is not feature-complete yet. The missing business-critical path is:
 3. order domain
 4. pricing and checkout
 5. fulfillment
-6. lifecycle notifications
+6. broader lifecycle communication beyond the current baseline
 
 ## Source Of Truth
 
@@ -60,7 +61,7 @@ The blunt MVP path from here is:
 6. integrate checkout and payment webhooks
 7. generate immutable printable assets for orders
 8. submit paid orders to the print provider and track status
-9. add lifecycle email delivery
+9. extend lifecycle communication where the product needs it
 
 Explicitly deferred from the critical path:
 

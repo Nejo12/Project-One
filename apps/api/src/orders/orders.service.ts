@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
+import { LifecycleEmailService } from '../notifications/lifecycle-email.service';
 import { buildPrintableAssetHtml } from '../rendering/rendering-html';
 import { StorageService } from '../storage/storage.service';
 import {
@@ -29,6 +30,7 @@ export class OrdersService {
   constructor(
     private readonly ordersRepository: OrdersRepository,
     private readonly storageService: StorageService,
+    private readonly lifecycleEmailService: LifecycleEmailService,
   ) {}
 
   async listOrders(userId: string): Promise<OrderListResponse> {
@@ -87,6 +89,17 @@ export class OrdersService {
       photoFit: draft.photoFit,
       scheduledFor: draft.scheduledFor,
       occurrenceDate: draft.occurrenceDate,
+    });
+
+    await this.lifecycleEmailService.sendPaymentRequiredEmail({
+      userId,
+      orderId: order.id,
+      recipientEmail: draft.user.email,
+      recipientName: draft.user.profile?.fullName ?? draft.user.displayName,
+      contactFirstName: draft.contact.firstName,
+      templateName: draft.template.name,
+      totalCents: order.totalCents,
+      currency: order.currency,
     });
 
     return {

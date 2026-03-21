@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { LifecycleEmailService } from '../notifications/lifecycle-email.service';
 import {
   FulfillmentStatusSyncResponse,
   FulfillmentSubmissionResponse,
@@ -13,6 +14,7 @@ export class FulfillmentService {
   constructor(
     private readonly fulfillmentRepository: FulfillmentRepository,
     private readonly printProviderService: PrintProviderService,
+    private readonly lifecycleEmailService: LifecycleEmailService,
   ) {}
 
   async submitPaidOrders(
@@ -104,6 +106,19 @@ export class FulfillmentService {
           shipmentTrackingUrl: result.success.shipmentTrackingUrl,
         });
         updatedOrders += 1;
+
+        if (result.success.providerFulfillmentStatus === 'SHIPPED') {
+          await this.lifecycleEmailService.sendOrderShippedEmail({
+            userId: order.userId,
+            orderId: order.id,
+            recipientEmail: order.user.email,
+            recipientName:
+              order.user.profile?.fullName ?? order.user.displayName ?? null,
+            contactFirstName: order.contactFirstName,
+            trackingNumber: result.success.shipmentTrackingNumber,
+            trackingUrl: result.success.shipmentTrackingUrl,
+          });
+        }
 
         if (result.success.providerFulfillmentStatus === 'DELIVERED') {
           fulfilledOrders += 1;

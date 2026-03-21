@@ -84,6 +84,18 @@ const fulfillmentSyncSelect = {
   providerFulfillmentStatus: true,
   shipmentTrackingNumber: true,
   shipmentTrackingUrl: true,
+  contactFirstName: true,
+  user: {
+    select: {
+      email: true,
+      displayName: true,
+      profile: {
+        select: {
+          fullName: true,
+        },
+      },
+    },
+  },
 } satisfies Prisma.OrderSelect;
 
 @Injectable()

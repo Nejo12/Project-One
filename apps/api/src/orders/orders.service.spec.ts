@@ -1,4 +1,5 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { LifecycleEmailService } from '../notifications/lifecycle-email.service';
 import { StorageService } from '../storage/storage.service';
 import { OrdersService } from './orders.service';
 import { OrdersRepository } from './orders.repository';
@@ -52,6 +53,13 @@ class OrdersRepositoryFake {
       renderPreview: {
         id: 'preview_1',
         artifactObjectId: 'artifact_1',
+      },
+      user: {
+        email: 'user@example.com',
+        displayName: 'Olaniyi',
+        profile: {
+          fullName: 'Olaniyi A.',
+        },
       },
     });
   }
@@ -152,17 +160,32 @@ class StorageServiceFake {
   }
 }
 
+class LifecycleEmailServiceFake {
+  paymentRequiredCalls: Array<{ orderId: string; recipientEmail: string }> = [];
+
+  sendPaymentRequiredEmail(params: {
+    orderId: string;
+    recipientEmail: string;
+  }) {
+    this.paymentRequiredCalls.push(params);
+    return Promise.resolve();
+  }
+}
+
 describe('OrdersService', () => {
   let repository: OrdersRepositoryFake;
   let storageService: StorageServiceFake;
+  let lifecycleEmailService: LifecycleEmailServiceFake;
   let service: OrdersService;
 
   beforeEach(() => {
     repository = new OrdersRepositoryFake();
     storageService = new StorageServiceFake();
+    lifecycleEmailService = new LifecycleEmailServiceFake();
     service = new OrdersService(
       repository as unknown as OrdersRepository,
       storageService as unknown as StorageService,
+      lifecycleEmailService as unknown as LifecycleEmailService,
     );
   });
 
@@ -174,6 +197,9 @@ describe('OrdersService', () => {
     expect(response.order.status).toBe('AWAITING_PAYMENT');
     expect(response.order.artifactObjectId).toBe('artifact_1');
     expect(response.order.printableAssetStatus).toBe('PENDING');
+    expect(lifecycleEmailService.paymentRequiredCalls[0]?.orderId).toBe(
+      'order_1',
+    );
   });
 
   it('rejects duplicate order creation for the same draft', async () => {

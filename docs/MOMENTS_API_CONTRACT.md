@@ -48,6 +48,7 @@ Behavior:
 
 - the API reports persisted draft state only; it does not materialize due drafts during read requests
 - a background worker claims due drafts, renders previews, and transitions them from `SCHEDULED` to `READY_FOR_REVIEW`
+- the first transition to `READY_FOR_REVIEW` now triggers a one-time lifecycle email
 
 ## `PATCH /drafts/:draftId`
 

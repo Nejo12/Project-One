@@ -1,6 +1,7 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { MomentsService } from './moments.service';
 import { MomentsRepository } from './moments.repository';
+import { LifecycleEmailService } from '../notifications/lifecycle-email.service';
 import { StorageService } from '../storage/storage.service';
 import { RenderingService } from '../rendering/rendering.service';
 import { MomentCreationContext } from './moments.types';
@@ -222,8 +223,36 @@ class MomentsRepositoryFake {
     return Promise.resolve([]);
   }
 
-  listDueScheduledDraftsByUserId() {
-    return Promise.resolve([]);
+  listDueScheduledDrafts() {
+    return Promise.resolve([
+      {
+        id: 'draft_due_1',
+        userId: 'user_1',
+        occurrenceDate: new Date('2099-04-16T00:00:00.000Z'),
+        photoObjectId: null,
+        photoFit: null,
+        fieldValues: {
+          recipient_name: 'Mira Cole',
+          message_body: 'Happy birthday, Mira. From Olaniyi A..',
+        },
+        momentRuleId: 'moment_1',
+        contact: {
+          firstName: 'Mira',
+        },
+        template: {
+          id: 'template_1',
+          slug: 'birthday-bloom',
+          name: 'Birthday Bloom',
+        },
+        user: {
+          email: 'user@example.com',
+          displayName: 'Olaniyi',
+          profile: {
+            fullName: 'Olaniyi A.',
+          },
+        },
+      },
+    ]);
   }
 
   findDraftDecisionContext() {
@@ -235,6 +264,14 @@ class MomentsRepositoryFake {
   }
 
   updateDraftAsReadyForReview() {
+    return Promise.resolve();
+  }
+
+  claimDraftForProcessing() {
+    return Promise.resolve(true);
+  }
+
+  resetDraftToScheduled() {
     return Promise.resolve();
   }
 
@@ -315,16 +352,28 @@ class RenderingServiceFake {
   }
 }
 
+class LifecycleEmailServiceFake {
+  draftReadyCalls: Array<{ draftId: string; recipientEmail: string }> = [];
+
+  sendDraftReadyEmail(params: { draftId: string; recipientEmail: string }) {
+    this.draftReadyCalls.push(params);
+    return Promise.resolve();
+  }
+}
+
 describe('MomentsService', () => {
   let repository: MomentsRepositoryFake;
+  let lifecycleEmailService: LifecycleEmailServiceFake;
   let service: MomentsService;
 
   beforeEach(() => {
     repository = new MomentsRepositoryFake();
+    lifecycleEmailService = new LifecycleEmailServiceFake();
     service = new MomentsService(
       repository as unknown as MomentsRepository,
       new StorageServiceFake() as unknown as StorageService,
       new RenderingServiceFake() as unknown as RenderingService,
+      lifecycleEmailService as unknown as LifecycleEmailService,
     );
   });
 
@@ -438,6 +487,16 @@ describe('MomentsService', () => {
     expect(repository.updatedDraftPayload?.renderPreviewId).toBe('preview_1');
     expect(response.draft.headline).toBe('Updated headline');
     expect(response.draft.photoObjectId).toBe('photo_1');
+  });
+
+  it('materializes due drafts and sends a draft-ready email', async () => {
+    const response = await service.materializeDueDrafts();
+
+    expect(response.claimedDrafts).toBe(1);
+    expect(response.processedDrafts).toBe(1);
+    expect(lifecycleEmailService.draftReadyCalls[0]?.draftId).toBe(
+      'draft_due_1',
+    );
   });
 
   it('approves a review-ready draft and schedules the next occurrence', async () => {

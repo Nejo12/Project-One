@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "npm run prisma:generate && nest build",
+    "build": "node -e \"const fs=require('node:fs'); for (const entry of fs.readdirSync('.')) { if (entry.startsWith('dist')) fs.rmSync(entry, { recursive: true, force: true }); }\" && npm run prisma:generate && nest build",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:migrate:dev": "prisma migrate dev",
     "db:studio": "prisma studio",

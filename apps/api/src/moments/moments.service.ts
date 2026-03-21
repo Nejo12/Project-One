@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { MomentEventType, RenderPhotoFit } from '@prisma/client';
+import { LifecycleEmailService } from '../notifications/lifecycle-email.service';
 import { RenderingService } from '../rendering/rendering.service';
 import { StorageService } from '../storage/storage.service';
 import {
@@ -36,6 +37,7 @@ export class MomentsService {
     private readonly momentsRepository: MomentsRepository,
     private readonly storageService: StorageService,
     private readonly renderingService: RenderingService,
+    private readonly lifecycleEmailService: LifecycleEmailService,
   ) {}
 
   async listMoments(userId: string): Promise<MomentRuleListResponse> {
@@ -352,6 +354,16 @@ export class MomentsService {
       draft.id,
       preview.preview.id,
     );
+    await this.lifecycleEmailService.sendDraftReadyEmail({
+      userId: draft.userId,
+      draftId: draft.id,
+      recipientEmail: draft.user.email,
+      recipientName:
+        draft.user.profile?.fullName ?? draft.user.displayName ?? null,
+      contactFirstName: draft.contact.firstName,
+      templateName: draft.template.name,
+      occurrenceDate: draft.occurrenceDate,
+    });
   }
 
   private assertDraftReadyForReview(status: DraftRecord['status']): void {

@@ -124,6 +124,18 @@ enum ProviderFulfillmentStatus {
   FAILED
 }
 
+enum EmailNotificationKind {
+  DRAFT_READY
+  PAYMENT_REQUIRED
+  ORDER_SHIPPED
+}
+
+enum EmailNotificationStatus {
+  PROCESSING
+  SENT
+  FAILED
+}
+
 model User {
   id                  String                   @id @default(cuid())
   email               String                   @unique
@@ -138,6 +150,7 @@ model User {
   drafts              Draft[]
   momentRules         MomentRule[]
   orders              Order[]
+  emailNotifications  EmailNotificationEvent[]
   providerLogs        FulfillmentProviderLog[]
   paymentEvents       PaymentWebhookEvent[]
   profile             SenderProfile?
@@ -482,4 +495,24 @@ model PasswordResetToken {
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+model EmailNotificationEvent {
+  id                String                  @id @default(cuid())
+  userId            String
+  kind              EmailNotificationKind
+  dedupeKey         String                  @unique
+  resourceId        String
+  recipientEmail    String
+  deliveryStatus    EmailNotificationStatus @default(PROCESSING)
+  providerMessageId String?
+  lastError         String?
+  attemptCount      Int                     @default(1)
+  sentAt            DateTime?
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+  user              User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, kind, createdAt])
+  @@index([resourceId, kind])
 }
