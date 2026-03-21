@@ -49,6 +49,8 @@ Only the web app may expose browser-safe variables, and they must use the `NEXT_
   - `REDIS_URL`
   - `INTERNAL_WORKER_TOKEN`
   - `JWT_SECRET`
+  - `EMAIL_DELIVERY_MODE`
+  - `RESEND_API_KEY`
   - `STRIPE_SECRET_KEY`
   - `STRIPE_WEBHOOK_SECRET`
   - `PRINT_PROVIDER_MODE`
@@ -59,18 +61,20 @@ Only the web app may expose browser-safe variables, and they must use the `NEXT_
 
 ### Shared local development reference
 
-| Variable                | Local         | CI     | Preview      | Staging      | Production   | Notes                                    |
-| ----------------------- | ------------- | ------ | ------------ | ------------ | ------------ | ---------------------------------------- |
-| `NODE_ENV`              | `development` | `test` | `production` | `production` | `production` | Runtime mode                             |
-| `WEB_APP_URL`           | Required      | No     | Optional     | Required     | Required     | Shared local reference only              |
-| `API_BASE_URL`          | Required      | No     | Optional     | Required     | Required     | Shared local reference only              |
-| `INTERNAL_WORKER_TOKEN` | Required      | No     | Required     | Required     | Required     | Shared secret between API and worker     |
-| `DATABASE_URL`          | Required      | No     | Required     | Required     | Required     | Primary application database             |
-| `REDIS_URL`             | Required      | No     | Required     | Required     | Required     | Queue backing service                    |
-| `S3_ENDPOINT`           | Required      | No     | Required     | Required     | Required     | Local MinIO, remote object storage later |
-| `S3_BUCKET`             | Required      | No     | Required     | Required     | Required     | Artifact bucket                          |
-| `S3_ACCESS_KEY_ID`      | Required      | No     | Required     | Required     | Required     | Secret outside local examples            |
-| `S3_SECRET_ACCESS_KEY`  | Required      | No     | Required     | Required     | Required     | Secret outside local examples            |
+| Variable                | Local         | CI     | Preview      | Staging      | Production   | Notes                                         |
+| ----------------------- | ------------- | ------ | ------------ | ------------ | ------------ | --------------------------------------------- |
+| `NODE_ENV`              | `development` | `test` | `production` | `production` | `production` | Runtime mode                                  |
+| `WEB_APP_URL`           | Required      | No     | Optional     | Required     | Required     | Shared local reference only                   |
+| `API_BASE_URL`          | Required      | No     | Optional     | Required     | Required     | Shared local reference only                   |
+| `INTERNAL_WORKER_TOKEN` | Required      | No     | Required     | Required     | Required     | Shared secret between API and worker          |
+| `DATABASE_URL`          | Required      | No     | Required     | Required     | Required     | Primary application database                  |
+| `REDIS_URL`             | Required      | No     | Required     | Required     | Required     | Queue backing service                         |
+| `S3_ENDPOINT`           | Required      | No     | Required     | Required     | Required     | Local MinIO, remote object storage later      |
+| `S3_BUCKET`             | Required      | No     | Required     | Required     | Required     | Artifact bucket                               |
+| `S3_ACCESS_KEY_ID`      | Required      | No     | Required     | Required     | Required     | Secret outside local examples                 |
+| `S3_SECRET_ACCESS_KEY`  | Required      | No     | Required     | Required     | Required     | Secret outside local examples                 |
+| `EMAIL_DELIVERY_MODE`   | Required      | No     | Required     | Required     | Required     | `preview` locally, `resend` for real delivery |
+| `RESEND_API_KEY`        | Optional      | No     | Required     | Required     | Required     | Required when `EMAIL_DELIVERY_MODE=resend`    |
 
 ### Web app
 
@@ -80,22 +84,24 @@ Only the web app may expose browser-safe variables, and they must use the `NEXT_
 
 ### API app
 
-| Variable                | Local    | CI  | Preview  | Staging  | Production | Notes                                     |
-| ----------------------- | -------- | --- | -------- | -------- | ---------- | ----------------------------------------- |
-| `PORT`                  | Required | No  | Required | Required | Required   | Defaults to `3001` locally                |
-| `APP_BASE_URL`          | Required | No  | Required | Required | Required   | Current local web origin                  |
-| `DATABASE_URL`          | Required | No  | Required | Required | Required   | Server-only                               |
-| `REDIS_URL`             | Required | No  | Required | Required | Required   | Server-only                               |
-| `S3_ENDPOINT`           | Required | No  | Required | Required | Required   | Server-only                               |
-| `S3_BUCKET`             | Required | No  | Required | Required | Required   | Server-only                               |
-| `S3_ACCESS_KEY_ID`      | Required | No  | Required | Required | Required   | Secret                                    |
-| `S3_SECRET_ACCESS_KEY`  | Required | No  | Required | Required | Required   | Secret                                    |
-| `STRIPE_SECRET_KEY`     | Required | No  | Required | Required | Required   | Secret                                    |
-| `STRIPE_WEBHOOK_SECRET` | Required | No  | Required | Required | Required   | Secret                                    |
-| `PRINT_PROVIDER_MODE`   | Required | No  | Required | Required | Required   | `sandbox` until a live provider is chosen |
-| `JWT_SECRET`            | Required | No  | Required | Required | Required   | Secret                                    |
-| `INTERNAL_WORKER_TOKEN` | Required | No  | Required | Required | Required   | Shared worker secret                      |
-| `EMAIL_FROM`            | Required | No  | Required | Required | Required   | Sender identity                           |
+| Variable                | Local    | CI  | Preview  | Staging  | Production | Notes                                                    |
+| ----------------------- | -------- | --- | -------- | -------- | ---------- | -------------------------------------------------------- |
+| `PORT`                  | Required | No  | Required | Required | Required   | Defaults to `3001` locally                               |
+| `APP_BASE_URL`          | Required | No  | Required | Required | Required   | Current local web origin                                 |
+| `DATABASE_URL`          | Required | No  | Required | Required | Required   | Server-only                                              |
+| `REDIS_URL`             | Required | No  | Required | Required | Required   | Server-only                                              |
+| `S3_ENDPOINT`           | Required | No  | Required | Required | Required   | Server-only                                              |
+| `S3_BUCKET`             | Required | No  | Required | Required | Required   | Server-only                                              |
+| `S3_ACCESS_KEY_ID`      | Required | No  | Required | Required | Required   | Secret                                                   |
+| `S3_SECRET_ACCESS_KEY`  | Required | No  | Required | Required | Required   | Secret                                                   |
+| `STRIPE_SECRET_KEY`     | Required | No  | Required | Required | Required   | Secret                                                   |
+| `STRIPE_WEBHOOK_SECRET` | Required | No  | Required | Required | Required   | Secret                                                   |
+| `EMAIL_DELIVERY_MODE`   | Required | No  | Required | Required | Required   | `preview` for local work, `resend` for provider delivery |
+| `RESEND_API_KEY`        | Optional | No  | Required | Required | Required   | Required when `EMAIL_DELIVERY_MODE=resend`               |
+| `PRINT_PROVIDER_MODE`   | Required | No  | Required | Required | Required   | `sandbox` until a live provider is chosen                |
+| `JWT_SECRET`            | Required | No  | Required | Required | Required   | Secret                                                   |
+| `INTERNAL_WORKER_TOKEN` | Required | No  | Required | Required | Required   | Shared worker secret                                     |
+| `EMAIL_FROM`            | Required | No  | Required | Required | Required   | Sender identity                                          |
 
 ### Worker app
 

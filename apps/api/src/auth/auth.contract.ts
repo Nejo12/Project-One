@@ -1,6 +1,6 @@
 /**
  * Browser-to-API auth contract used by the web app and by tests.
- * Temporary token preview fields are development-only until email delivery exists.
+ * Temporary token preview fields are preview-mode only and should not be used in production.
  */
 export interface AuthUserView {
   id: string;

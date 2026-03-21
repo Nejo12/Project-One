@@ -6,7 +6,7 @@ This document defines the first browser-to-API contract for auth flows in the Ne
 
 - keep the auth boundary explicit before UI implementation starts
 - let the web app integrate against stable routes and response shapes
-- separate temporary bootstrap behavior from long-term production behavior
+- separate preview-mode bootstrap behavior from production email delivery
 
 ## Routes
 
@@ -28,7 +28,7 @@ Response:
 
 - `user`
 - `nextStep`
-- development-only `verification` token preview until email delivery exists
+- `verification` token preview only when `EMAIL_DELIVERY_MODE=preview`
 
 ### `POST /auth/verify-email`
 
@@ -58,7 +58,7 @@ Creates a password reset token for an active verified user.
 Response is intentionally generic:
 
 - always returns `accepted: true`
-- includes a development-only `reset` token preview until email delivery exists
+- includes a `reset` token preview only when `EMAIL_DELIVERY_MODE=preview`
 
 ### `POST /auth/password-reset/confirm`
 
@@ -81,18 +81,20 @@ Authorization: Bearer <access-token>
 - access token TTL is seven days
 - only active verified users receive sessions
 
-## Development-Only Bootstrap Behavior
+## Preview-Mode Bootstrap Behavior
 
-Until an email provider is integrated, the API exposes token previews in non-production environments:
+When `EMAIL_DELIVERY_MODE=preview`, the API exposes token previews for local development and test integration:
 
 - signup response may include `verification`
 - password reset request response may include `reset`
 
-These preview fields are for local development and test integration only. They must not be relied on in production.
+When `EMAIL_DELIVERY_MODE=resend`, the API sends verification and reset emails through Resend and does not expose preview tokens in responses.
+
+These preview fields must not be relied on in production.
 
 ## Next Backend Steps
 
 1. add refresh/session revocation strategy if the product needs longer-lived sessions
-2. integrate email delivery for verification and password reset
+2. reuse the email delivery boundary for lifecycle mail flows
 3. add auth guards around protected domain routes as those modules are introduced
 4. connect the web app to these routes with typed client calls

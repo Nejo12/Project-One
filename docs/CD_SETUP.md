@@ -104,6 +104,9 @@ For each Railway service:
 - `api`
   - `APP_BASE_URL`
   - `INTERNAL_WORKER_TOKEN`
+  - `EMAIL_DELIVERY_MODE`
+  - `RESEND_API_KEY`
+  - `EMAIL_FROM`
   - `STRIPE_SECRET_KEY`
   - `STRIPE_WEBHOOK_SECRET`
   - `PRINT_PROVIDER_MODE`
@@ -136,6 +139,7 @@ For each Railway service:
 3. Create the Vercel web project rooted at `apps/web`.
 4. Create Railway `api` and `worker` services for `staging` and `production`.
 5. Add runtime variables on Vercel and Railway.
+   - For real auth email delivery, set `EMAIL_DELIVERY_MODE=resend` and add a valid `RESEND_API_KEY` on the Railway `api` service.
 6. Run the `deploy-web` workflow manually in `preview` mode to verify Vercel linkage.
 7. Run the `deploy-services` workflow manually for `staging` to verify Railway deploy hooks.
 8. Keep provider-native Git deployment enabled so normal pushes do not depend on GitHub fallback workflows.

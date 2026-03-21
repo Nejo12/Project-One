@@ -1,12 +1,14 @@
 import { ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import { UserStatus } from '@prisma/client';
 import { AuthService } from './auth.service';
+import { AuthEmailService } from './auth-email.service';
 import { AuthRepository } from './auth.repository';
 import { AuthTokenService } from './auth-token.service';
 import { PasswordHasher } from './password-hasher';
 import { SessionTokenService } from './session-token.service';
 import {
   AuthUserRecord,
+  CreateUserParams,
   PasswordResetTokenRecord,
   VerificationTokenRecord,
 } from './auth.types';
@@ -40,7 +42,9 @@ class AuthRepositoryFake {
     return Promise.resolve(null);
   }
 
-  createUserWithVerificationToken() {
+  createUserWithVerificationToken(
+    _params: CreateUserParams,
+  ): Promise<AuthUserRecord> {
     return Promise.reject(new Error('not implemented'));
   }
 
@@ -99,9 +103,48 @@ class AuthRepositoryFake {
   }
 }
 
+class AuthEmailServiceFake {
+  verificationEmails: Array<{
+    email: string;
+    displayName: string | null;
+    token: string;
+  }> = [];
+
+  passwordResetEmails: Array<{
+    email: string;
+    displayName: string | null;
+    token: string;
+  }> = [];
+
+  sendVerificationEmail(params: {
+    email: string;
+    displayName: string | null;
+    token: string;
+  }) {
+    this.verificationEmails.push(params);
+    return Promise.resolve({
+      delivered: false,
+      providerMessageId: null,
+    });
+  }
+
+  sendPasswordResetEmail(params: {
+    email: string;
+    displayName: string | null;
+    token: string;
+  }) {
+    this.passwordResetEmails.push(params);
+    return Promise.resolve({
+      delivered: false,
+      providerMessageId: null,
+    });
+  }
+}
+
 describe('AuthService', () => {
   let authService: AuthService;
   let authRepository: AuthRepositoryFake;
+  let authEmailService: AuthEmailServiceFake;
   let passwordHasher: PasswordHasher;
   let authTokenService: AuthTokenService;
   let sessionTokenService: SessionTokenService;
@@ -111,6 +154,7 @@ describe('AuthService', () => {
     process.env.JWT_SECRET = 'test-secret';
 
     authRepository = new AuthRepositoryFake();
+    authEmailService = new AuthEmailServiceFake();
     passwordHasher = new PasswordHasher();
     authTokenService = new AuthTokenService();
     sessionTokenService = new SessionTokenService();
@@ -119,6 +163,7 @@ describe('AuthService', () => {
       passwordHasher,
       authTokenService,
       sessionTokenService,
+      authEmailService as unknown as AuthEmailService,
     );
 
     const passwordHash = await passwordHasher.hash('correct horse battery');
@@ -155,6 +200,55 @@ describe('AuthService', () => {
         password: 'correct horse battery',
       }),
     ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('sends a verification email after signup', async () => {
+    const createdUsers = authRepository.userByEmail;
+    authRepository.createUserWithVerificationToken = ({
+      email,
+      passwordHash,
+      verificationExpiresAt,
+      displayName,
+    }: CreateUserParams) => {
+      const newUser = {
+        id: 'user_signup',
+        email,
+        displayName,
+        status: UserStatus.PENDING_VERIFICATION,
+        emailVerifiedAt: null,
+        passwordHash,
+      };
+
+      createdUsers.set(email, newUser);
+      authRepository.verificationToken = {
+        id: 'verify_signup',
+        userId: newUser.id,
+        expiresAt: verificationExpiresAt,
+        consumedAt: null,
+        user: newUser,
+      };
+
+      return Promise.resolve({
+        id: newUser.id,
+        email: newUser.email,
+        displayName: newUser.displayName,
+        status: newUser.status,
+        emailVerifiedAt: newUser.emailVerifiedAt,
+      });
+    };
+
+    const response = await authService.signUp({
+      email: 'signup@example.com',
+      password: 'strong password 123',
+      displayName: 'Signup User',
+    });
+
+    expect(response.user.email).toBe('signup@example.com');
+    expect(authEmailService.verificationEmails).toHaveLength(1);
+    expect(authEmailService.verificationEmails[0]?.email).toBe(
+      'signup@example.com',
+    );
+    expect(authEmailService.verificationEmails[0]?.token).toHaveLength(43);
   });
 
   it('activates the user during email verification and returns a session', async () => {
@@ -194,5 +288,26 @@ describe('AuthService', () => {
         newPassword: 'updated horse battery',
       }),
     ).rejects.toBeInstanceOf(UnauthorizedException);
+  });
+
+  it('sends a password reset email for active verified users', async () => {
+    const currentUser = authRepository.userByEmail.get('user@example.com');
+    if (!currentUser) {
+      throw new Error('expected test user');
+    }
+
+    currentUser.status = UserStatus.ACTIVE;
+    currentUser.emailVerifiedAt = new Date();
+
+    const response = await authService.requestPasswordReset({
+      email: 'user@example.com',
+    });
+
+    expect(response.accepted).toBe(true);
+    expect(authEmailService.passwordResetEmails).toHaveLength(1);
+    expect(authEmailService.passwordResetEmails[0]?.email).toBe(
+      'user@example.com',
+    );
+    expect(authEmailService.passwordResetEmails[0]?.token).toHaveLength(43);
   });
 });

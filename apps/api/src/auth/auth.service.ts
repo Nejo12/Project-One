@@ -6,16 +6,19 @@ import {
 } from '@nestjs/common';
 import { UserStatus } from '@prisma/client';
 import {
-  AuthSessionView,
   AuthUserView,
   LoginRequestBody,
+  LoginResponse,
+  PasswordResetConfirmResponse,
   PasswordResetConfirmRequestBody,
   PasswordResetRequestBody,
   PasswordResetRequestResponse,
   SignUpRequestBody,
   SignUpResponse,
   VerifyEmailRequestBody,
+  VerifyEmailResponse,
 } from './auth.contract';
+import { AuthEmailService } from './auth-email.service';
 import { AuthRepository } from './auth.repository';
 import { AuthTokenService } from './auth-token.service';
 import { PasswordHasher } from './password-hasher';
@@ -29,6 +32,7 @@ export class AuthService {
     private readonly passwordHasher: PasswordHasher,
     private readonly authTokenService: AuthTokenService,
     private readonly sessionTokenService: SessionTokenService,
+    private readonly authEmailService: AuthEmailService,
   ) {}
 
   async signUp(input: SignUpRequestBody): Promise<SignUpResponse> {
@@ -49,6 +53,12 @@ export class AuthService {
       verificationExpiresAt: verification.expiresAt,
     });
 
+    await this.authEmailService.sendVerificationEmail({
+      email: user.email,
+      displayName: user.displayName,
+      token: verification.token,
+    });
+
     const response: SignUpResponse = {
       user: this.toAuthUserView(user),
       nextStep: 'verify_email',
@@ -64,10 +74,9 @@ export class AuthService {
     return response;
   }
 
-  async verifyEmail(input: VerifyEmailRequestBody): Promise<{
-    user: AuthUserView;
-    session: AuthSessionView;
-  }> {
+  async verifyEmail(
+    input: VerifyEmailRequestBody,
+  ): Promise<VerifyEmailResponse> {
     const token = await this.authRepository.findVerificationTokenByHash(
       this.authTokenService.hashToken(input.token),
     );
@@ -93,10 +102,7 @@ export class AuthService {
     };
   }
 
-  async login(input: LoginRequestBody): Promise<{
-    user: AuthUserView;
-    session: AuthSessionView;
-  }> {
+  async login(input: LoginRequestBody): Promise<LoginResponse> {
     const user = await this.authRepository.findUserByEmail(input.email);
     if (!user?.passwordHash) {
       throw new UnauthorizedException('Invalid email or password.');
@@ -144,6 +150,12 @@ export class AuthService {
       expiresAt: reset.expiresAt,
     });
 
+    await this.authEmailService.sendPasswordResetEmail({
+      email: user.email,
+      displayName: user.displayName,
+      token: reset.token,
+    });
+
     if (!this.shouldExposeTokenPreview()) {
       return { accepted: true };
     }
@@ -157,10 +169,9 @@ export class AuthService {
     };
   }
 
-  async confirmPasswordReset(input: PasswordResetConfirmRequestBody): Promise<{
-    user: AuthUserView;
-    session: AuthSessionView;
-  }> {
+  async confirmPasswordReset(
+    input: PasswordResetConfirmRequestBody,
+  ): Promise<PasswordResetConfirmResponse> {
     const token = await this.authRepository.findPasswordResetTokenByHash(
       this.authTokenService.hashToken(input.token),
     );
@@ -217,6 +228,6 @@ export class AuthService {
   }
 
   private shouldExposeTokenPreview(): boolean {
-    return process.env.NODE_ENV !== 'production';
+    return process.env.EMAIL_DELIVERY_MODE !== 'resend';
   }
 }

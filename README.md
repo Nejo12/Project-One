@@ -19,6 +19,7 @@ The project is no longer in scaffold mode. These slices are already implemented:
 - storage-backed upload metadata
 - server preview rendering
 - moments rule creation and draft materialization baseline
+- provider-backed auth email delivery support via Resend-compatible API mode
 
 Deployments are currently owned by the providers:
 
